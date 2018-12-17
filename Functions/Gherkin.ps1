@@ -1,7 +1,7 @@
 ﻿if (($PSVersionTable.ContainsKey('PSEdition')) -and ($PSVersionTable.PSEdition -eq 'Core')) {
-    & $SafeCommands["Add-Type"] -Path "${Script:PesterRoot}/lib/core/Gherkin.dll"
+    & $SafeCommands["Add-Type"] -Path "${Script:PesterRoot}/lib/Gherkin/core/Gherkin.dll"
 } else {
-    & $SafeCommands["Import-Module"] -Name "${Script:PesterRoot}/lib/legacy/Gherkin.dll"
+    & $SafeCommands["Import-Module"] -Name "${Script:PesterRoot}/lib/Gherkin/legacy/Gherkin.dll"
 }
 
 $GherkinSteps = @{}
@@ -503,7 +503,7 @@ function Invoke-GherkinFeature {
     }
 
     if ($Scenarios) {
-        Write-Describe "$($Feature.Keyword): $($Feature.Name)"
+        Write-Describe ([PSCustomObject] @{Name = "$($Feature.Keyword): $($Feature.Name)"; Description = $Feature.Description })
     }
 
     try {
@@ -544,7 +544,7 @@ function Invoke-GherkinScenario {
     try {
         # We just display 'Scenario', also for 'Scenario Outline' or 'Scenario Template'
         # Thus we use the translation of 'scenario' instead of $Scenario.Keyword
-        Write-Context "$(Get-Translation 'scenario' $Language): $($Scenario.Name)"
+        Write-Context ([PSCustomObject] @{Name = "$(Get-Translation 'scenario' $Language): $($Scenario.Name)"; Description = $Scenario.Description })
 
         $script:mockTable = @{}
 
@@ -875,7 +875,7 @@ function Get-Translations($TranslationKey, $Language) {
             System.String[] an array of all the translations
     #>
     if (-not ($Script:GherkinLanguagesJson)) {
-        $Script:GherkinLanguagesJson = ConvertFrom-Json (Get-Content "$PsScriptRoot/gherkin-languages.json" | Out-String)
+        $Script:GherkinLanguagesJson = ConvertFrom-Json (Get-Content "${Script:PesterRoot}/lib/Gherkin/gherkin-languages.json" | Out-String)
         # We override the fixed values for 'Describe' and 'Context' of Gherkin.psd1 or Output.ps1 since the language aware keywords
         # (e.g. 'Feature'/'Funktionalität' or 'Scenario'/'Szenario') are provided by Gherkin.dll and we do not want to duplicate them.
         $Script:ReportStrings.Describe = "{0}" # instead of 'Feature: {0}'  or 'Describing {0}'
