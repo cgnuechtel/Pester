@@ -218,7 +218,9 @@ function Invoke-Gherkin {
 
         [Pester.OutputTypes]$Show = 'All',
 
-        [switch]$PassThru
+        [switch]$PassThru,
+
+        [string]$StepPath
     )
     begin {
         & $SafeCommands["Import-LocalizedData"] -BindingVariable Script:ReportStrings -BaseDirectory $PesterRoot -FileName Gherkin.psd1 -ErrorAction SilentlyContinue
@@ -282,7 +284,7 @@ function Invoke-Gherkin {
         Enter-CoverageAnalysis -CodeCoverage $CodeCoverage -PesterState $pester
 
         foreach ($FeatureFile in & $SafeCommands["Get-ChildItem"] $Path -Filter "*.feature" -Recurse ) {
-            Invoke-GherkinFeature $FeatureFile -Pester $pester
+            Invoke-GherkinFeature $FeatureFile -Pester $pester -StepPath $StepPath
         }
 
         # Remove all the steps
@@ -464,7 +466,8 @@ function Invoke-GherkinFeature {
         [Parameter(Mandatory = $True, Position = 0, ValueFromPipelineByPropertyName = $True)]
         [IO.FileInfo]$FeatureFile,
 
-        [PSObject]$Pester
+        [PSObject]$Pester,
+        [string]$StepPath
     )
     $Pester.EnterTestGroup($FeatureFile.FullName, 'Script')
     # Make sure broken tests don't leave you in space:
@@ -474,7 +477,8 @@ function Invoke-GherkinFeature {
 
     try {
         $Parent = & $SafeCommands["Split-Path"] $FeatureFile.FullName
-        Import-GherkinSteps -StepPath $Parent -Pester $pester
+        $usedStepPath = if ($StepPath) { $StepPath } else { $Parent }
+        Import-GherkinSteps -StepPath $usedStepPath -Pester $pester
         $Feature, $Background, $Scenarios = Import-GherkinFeature -Path $FeatureFile.FullName -Pester $Pester
     } catch [Gherkin.ParserException] {
         & $SafeCommands["Write-Error"] -Exception $_.Exception -Message "Skipped '$($FeatureFile.FullName)' because of parser error.`n$(($_.Exception.Errors | & $SafeCommands["Select-Object"] -Expand Message) -join "`n`n")"

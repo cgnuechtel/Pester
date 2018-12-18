@@ -328,3 +328,32 @@ Describe "Check test results of steps" -Tag Gherkin {
 
 
 }
+
+Describe "When using another step path" -Tag Gherkin {
+    # Calling this in a job so we don't monkey with the active pester state that's already running
+    $job = Start-Job -ArgumentList $scriptRoot -ScriptBlock {
+        param ($scriptRoot)
+        Get-Module Pester | Remove-Module -Force
+        Import-Module $scriptRoot\Pester.psd1 -Force
+
+        New-Object psobject -Property @{
+            Results = Invoke-Gherkin (Join-Path $scriptRoot .\Examples\Gherkin-Another-Root\Features) -PassThru -Show None -StepPath (Join-Path $scriptRoot .\Examples\Gherkin-Another-Root\Steps)
+        }
+    }
+
+    $gherkin = $job | Wait-Job | Receive-Job
+    Remove-Job $job
+
+    It 'Should show the name of the feature executed during the test run' {
+        $gherkin.Results.Features | Should -Be "Hello World"
+    }
+
+    It 'Should show the name of the passed scenario' {
+        $gherkin.Results.PassedScenarios | Should -Be 'Say hello world to any person'
+    }
+
+    It 'Should not have failed scenarios' {
+        $gherkin.Results.FailedScenarios | Should -BeNullOrEmpty
+    }
+}
+
