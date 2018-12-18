@@ -292,10 +292,10 @@ Describe "Check test results of steps" -Tag Gherkin {
 
     function Get-ExpectedResult($i) {
         switch ($i) {
-            { $_ -in (8, 9, 11) }  {
+            { $_ -in (8, 9) }  {
                 return 'Failed'
             }
-            { $_ -in (12, 14) }  {
+            { $_ -in (10, 11, 12, 13, 14) }  {
                 return 'Inconclusive'
             }
             default { return 'Passed' }
