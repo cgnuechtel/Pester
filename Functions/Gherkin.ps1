@@ -850,3 +850,65 @@ function ConvertTo-HashTableArray {
     }
 }
 
+
+
+function ConvertTo-HtmlReport {
+<#
+    .SYNOPSIS
+    Converts a XML report in the human-friendly HTML format
+
+    .DESCRIPTION
+    
+
+    .PARAMETER Inconclusive
+    Sets the test result to inconclusive. Cannot be used at the same time as -Pending or -Skipped
+
+    .PARAMETER Pending
+    Sets the test result to pending. Cannot be used at the same time as -Inconclusive or -Skipped
+
+    .PARAMETER Skipped
+    Sets the test result to skipped. Cannot be used at the same time as -Inconclusive or -Pending
+
+    .PARAMETER Because
+    Similarily to failing tests, skipped and inconclusive tests should have reason. It allows
+    to provide information to the user why the test is neither successful nor failed.
+
+    .EXAMPLE
+    bla bla
+
+    .EXAMPLE
+    blub blub
+
+#>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)][string]$InputFile,
+        [Parameter(Mandatory=$true)][string]$OutputFile
+    )
+
+# Create HTML report from created XML files
+    #$htmlReport = "$PSScriptRoot\results\spec-run-windows.html"
+    #. "$PSScriptRoot\Sources\Windows\Scripts\Convert-XmlWithXslt.ps1"
+    Convert-XmlWithXslt $InputFile `
+                        "$PSScriptRoot\gherkin-html-report.xslt" `
+                        $OutputFile
+}
+
+
+  
+
+
+function Convert-XmlWithXslt($xmlSourceFile, $xsltFile, $xmlTargetFile) {
+    $xsltFile = Resolve-Path $xsltFile 
+    $xmlSourceFile = Resolve-Path $xmlSourceFile
+    
+    Write-Host -Fo "Magenta" "XSLT FILE: $xsltFile"
+    Write-Host -Fo "Magenta" "XSLT FILE: $xmlSourceFile"
+    Write-Host -Fo "Magenta" "TARGET FILE: $(Resolve-Path $xmlTargetFile)"
+    
+    # Resolve directory of XML target file to ensure that it is correct
+    #Resolve-Path($xmlTargetFile) | Out-Null
+    $xslt = [System.Xml.Xsl.XslTransform]::new()
+    $xslt.Load($xsltFile)
+    $xslt.Transform($xmlSourceFile, (Resolve-Path $xmlTargetFile))
+}
