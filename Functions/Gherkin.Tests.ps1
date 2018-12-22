@@ -306,7 +306,7 @@ Describe "Check test results of steps" -Tag Gherkin {
     $gherkin = $job | Wait-Job | Receive-Job
     Remove-Job $job
 
-    $testResults = $gherkin.Results.TestResult.Result
+    $testResults = $gherkin.Results.TestResult | Select-Object -ExpandProperty Result
 
     It "Should have the expected number of test results" {
         $testResults.Count | Should -Be 15
@@ -456,6 +456,8 @@ Describe "A generated NUnit report" -Tag Gherkin {
     $feature1ScenariosXPath = "$featuresXPath[1]/results/test-suite"
     $feature2ScenariosXPath = "$featuresXPath[2]/results/test-suite"
 
+    $expectFeatureFileNameInStackTrace = $PSVersionTable.PSVersion.Major -gt 2
+
     It 'should be an existing and well formed XML file' {
         $reportFile | Should -Exist
         $nUnitReportXml | Should -Not -BeNullOrEmpty
@@ -535,7 +537,9 @@ Describe "A generated NUnit report" -Tag Gherkin {
         Get-XmlValue "($scenario2Examples1StepsXPath/@result)[6]" | Should -Be "Inconclusive"
 
         Get-XmlInnerText "$scenario2Examples1StepsXPath[5]/failure/message" | Should -Be "An example error in the then clause"
-        Get-XmlInnerText "($scenario2Examples1StepsXPath)[5]/failure/stack-trace" | Should -BeLike "*From $($expectedFeatureFileName1): line 15*"
+        if ($expectFeatureFileNameInStackTrace) { 
+            Get-XmlInnerText "($scenario2Examples1StepsXPath)[5]/failure/stack-trace" | Should -BeLike "*From $($expectedFeatureFileName1): line 15*"
+        }
         Get-XmlInnerText "($scenario2Examples1StepsXPath)[5]/failure/stack-trace" | Should -BeLike "*at <ScriptBlock>, $($expectedImplementationFileName): line 23*"
         Get-XmlInnerText "($scenario2Examples1StepsXPath)[6]/reason/message" | Should -Be "Step skipped (previous step did not pass)"
     }
@@ -578,7 +582,9 @@ Describe "A generated NUnit report" -Tag Gherkin {
         Get-XmlValue "($scenario3StepsXPath/@result)[5]" | Should -Be "Failure"
 
         Get-XmlInnerText "$scenario3StepsXPath[5]/failure/message" | Should -Be "Another example error in the then clause"
-        Get-XmlInnerText "($scenario3StepsXPath)[5]/failure/stack-trace" | Should -BeLike "*From $($expectedFeatureFileName1): line 32*"
+        if ($expectFeatureFileNameInStackTrace) { 
+            Get-XmlInnerText "($scenario3StepsXPath)[5]/failure/stack-trace" | Should -BeLike "*From $($expectedFeatureFileName1): line 32*"
+        }
         Get-XmlInnerText "($scenario3StepsXPath)[5]/failure/stack-trace" | Should -BeLike "*at <ScriptBlock>, $($expectedImplementationFileName): line 57*"
     }
 
@@ -596,7 +602,9 @@ Describe "A generated NUnit report" -Tag Gherkin {
         Get-XmlValue "($scenario4StepsXPath/@result)[3]" | Should -Be "Inconclusive"
 
         Get-XmlInnerText "$scenario4StepsXPath[2]/failure/message" | Should -Be "An example error in the when clause"
-        Get-XmlInnerText "($scenario4StepsXPath)[2]/failure/stack-trace" | Should -BeLike "*From $($expectedFeatureFileName2): line 6*"
+        if ($expectFeatureFileNameInStackTrace) { 
+            Get-XmlInnerText "($scenario4StepsXPath)[2]/failure/stack-trace" | Should -BeLike "*From $($expectedFeatureFileName2): line 6*"
+        }
         Get-XmlInnerText "($scenario4StepsXPath)[2]/failure/stack-trace" | Should -BeLike "*at <ScriptBlock>, $($expectedImplementationFileName): line 64*"
         Get-XmlInnerText "($scenario4StepsXPath)[3]/reason/message" | Should -Be "Step skipped (previous step did not pass)"
     }
@@ -667,7 +675,9 @@ Describe "A generated NUnit report" -Tag Gherkin {
         Get-XmlValue "($scenario5Examples3cStepsXPath/@result)[3]" | Should -Be "Inconclusive"
 
         Get-XmlInnerText "$scenario5Examples3aStepsXPath[1]/failure/message" | Should -Be "An example error in the given clause"
-        Get-XmlInnerText "($scenario5Examples3aStepsXPath)[1]/failure/stack-trace" | Should -BeLike "*From $($expectedFeatureFileName2): line 11"
+        if ($expectFeatureFileNameInStackTrace) { 
+            Get-XmlInnerText "($scenario5Examples3aStepsXPath)[1]/failure/stack-trace" | Should -BeLike "*From $($expectedFeatureFileName2): line 11"
+        }
         Get-XmlInnerText "($scenario5Examples3aStepsXPath)[1]/failure/stack-trace" | Should -BeLike "*at <ScriptBlock>, $($expectedImplementationFileName): line 71*"
         Get-XmlInnerText "($scenario5Examples3aStepsXPath)[2]/reason/message" | Should -Be "Step skipped (previous step did not pass)"
         Get-XmlInnerText "($scenario5Examples3aStepsXPath)[3]/reason/message" | Should -Be "Step skipped (previous step did not pass)"
