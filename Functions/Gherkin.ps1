@@ -704,7 +704,6 @@ function Invoke-GherkinStep {
     $DisplayText = "{0} {1}" -f $Step.Keyword.Trim(), $Step.Text
 
     $PesterErrorRecord = $null
-    $Source = $null
     $Elapsed = $null
     $NamedArguments = @{}
 
@@ -758,7 +757,6 @@ function Invoke-GherkinStep {
             }
             $watch.Stop()
             $Elapsed = $watch.Elapsed
-            $Source = $Script:GherkinSteps[$StepCommand].Source
         }
     } catch {
         $PesterErrorRecord = $_
@@ -783,7 +781,7 @@ function Invoke-GherkinStep {
             # Unless we really are a StackTrace...
             ${Pester Result}.StackTrace += "`nFrom " + $Step.Location.Path + ': line ' + $Step.Location.Line
         }
-        $Pester.AddTestResult($DisplayText, ${Pester Result}.Result, $Elapsed, $PesterErrorRecord.Exception.Message, ${Pester Result}.StackTrace, $Source, $NamedArguments, $PesterErrorRecord )
+        $Pester.AddTestResult($DisplayText, ${Pester Result}.Result, $Elapsed, $PesterErrorRecord.Exception.Message, ${Pester Result}.StackTrace, $null, $NamedArguments, $PesterErrorRecord )
         $Pester.TestResult[-1] | Write-PesterResult
     }
 }
