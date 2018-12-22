@@ -732,7 +732,7 @@ function Invoke-GherkinStep {
             } else {
                 "Step skipped (previous step did not pass)"
             }
-            $PesterErrorRecord = New-InconclusiveErrorRecord -Message $skipMessage -File $Step.Location.Path -Line $Step.Location.Line -LineText $DisplayText
+            $PesterErrorRecord = Set-ItResult -Inconclusive -Because $skipMessage -File $Step.Location.Path -Line $Step.Location.Line -LineText $DisplayText
         } else {
             $NamedArguments, $Parameters = Get-StepParameters $Step $StepCommand
             $watch = & $SafeCommands["New-Object"] System.Diagnostics.Stopwatch
@@ -781,7 +781,7 @@ function Invoke-GherkinStep {
             # Unless we really are a StackTrace...
             ${Pester Result}.StackTrace += "`nFrom " + $Step.Location.Path + ': line ' + $Step.Location.Line
         }
-        $Pester.AddTestResult($DisplayText, ${Pester Result}.Result, $Elapsed, $PesterErrorRecord.Exception.Message, ${Pester Result}.StackTrace, $null, $NamedArguments, $PesterErrorRecord )
+        $Pester.AddTestResult($DisplayText, ${Pester Result}.Result, $Elapsed, ${Pester Result}.FailureMessage, ${Pester Result}.StackTrace, $Source, $NamedArguments, $PesterErrorRecord)
         $Pester.TestResult[-1] | Write-PesterResult
     }
 }

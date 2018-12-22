@@ -306,7 +306,9 @@ Describe "Check test results of steps" -Tag Gherkin {
     $gherkin = $job | Wait-Job | Receive-Job
     Remove-Job $job
 
-    $testResults = $gherkin.Results.TestResult | Select-Object -ExpandProperty Result
+    $testResults = $gherkin.Results |
+        Select-Object -ExpandProperty TestResult |
+        Select-Object -ExpandProperty Result
 
     It "Should have the expected number of test results" {
         $testResults.Count | Should -Be 15
