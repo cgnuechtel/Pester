@@ -904,11 +904,11 @@ function Convert-XmlWithXslt($xmlSourceFile, $xsltFile, $xmlTargetFile) {
     
     Write-Host -Fo "Magenta" "XSLT FILE: $xsltFile"
     Write-Host -Fo "Magenta" "XSLT FILE: $xmlSourceFile"
-    Write-Host -Fo "Magenta" "TARGET FILE: $(Resolve-Path $xmlTargetFile)"
+    Write-Host -Fo "Magenta" "TARGET FILE: $xmlTargetFile"
     
     # Resolve directory of XML target file to ensure that it is correct
     #Resolve-Path($xmlTargetFile) | Out-Null
     $xslt = New-Object System.Xml.Xsl.XslTransform
     $xslt.Load([string]$xsltFile)
-    $xslt.Transform($xmlSourceFile, (Resolve-Path $xmlTargetFile))
+    $xslt.Transform($xmlSourceFile, $xmlTargetFile)
 }

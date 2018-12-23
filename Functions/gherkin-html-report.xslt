@@ -70,7 +70,7 @@
     <xsl:text>&lt;/td&gt;</xsl:text>
 
     <xsl:text>&lt;td class="inconclusive"&gt;</xsl:text>
-    <xsl:value-of select="count(node()/results/test-suite[count(node()//test-case[@result='Inconclusive']) &gt; 0 and count(node()//test-case[@result='Failure']) = 0])"/>
+    <xsl:value-of select="count(node()/results/test-suite[(count(node()//test-case[@result='Inconclusive']) &gt; 0 and count(node()//test-case[@result='Failure']) = 0) or (count(node()//test-case) = 0)])"/>
     <xsl:text>&lt;/td&gt;</xsl:text>
 
     <xsl:text>&lt;td class="failure"&gt;</xsl:text>
@@ -86,7 +86,7 @@
     <xsl:text>&lt;/td&gt;</xsl:text>
 
     <xsl:text>&lt;td class="inconclusive"&gt;</xsl:text>
-    <xsl:value-of select="count(node()/results/test-suite/results/test-suite[count(node()//test-case[@result='Inconclusive']) &gt; 0 and count(node()//test-case[@result='Failure']) = 0])"/>
+    <xsl:value-of select="count(node()/results/test-suite/results/test-suite[(count(node()//test-case[@result='Inconclusive']) &gt; 0 and count(node()//test-case[@result='Failure']) = 0) or (count(node()//test-case) = 0)])"/>
     <xsl:text>&lt;/td&gt;</xsl:text>
 
     <xsl:text>&lt;td class="failure"&gt;</xsl:text>
