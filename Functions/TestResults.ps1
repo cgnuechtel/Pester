@@ -526,23 +526,25 @@ function Get-GroupResult ($InputObject)
 }
 
 function Convert-Report {
-<#
+    <#
     .SYNOPSIS
         Converts a XML test result report into a more human-friendly format like HTML
 
-    .PARAMETER Inconclusive
-    Sets the test result to inconclusive. Cannot be used at the same time as -Pending or -Skipped
+    .PARAMETER InputFile
+        The already created XML test report
 
-    .PARAMETER Pending
-    Sets the test result to pending. Cannot be used at the same time as -Inconclusive or -Skipped
+    .PARAMETER OutputFile
+        The transformed output file which will be created
 
-    .PARAMETER Skipped
-    Sets the test result to skipped. Cannot be used at the same time as -Inconclusive or -Pending
+    .PARAMETER InputFormat
+        The input format, e.g. NUnitXml
 
-    .PARAMETER Because
-    Similarily to failing tests, skipped and inconclusive tests should have reason. It allows
-    to provide information to the user why the test is neither successful nor failed.
-#>
+    .PARAMETER OutputFormat
+        The output format, e.g. html
+
+    .PARAMETER TransformParameters
+        The optional parameters which will be passed to the XSLT file
+    #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)][string]$InputFile,
@@ -551,33 +553,44 @@ function Convert-Report {
         [Parameter(Mandatory=$true)][string]$OutputFormat,
         [hashtable]$TransformParameters = @{}
     )
-    
-    $xsltFile = "${Script:PesterRoot}\Functions\$InputFormat-$OutputFormat.xslt"
 
-    $xmlSourceFile = Resolve-Path $InputFile
-    
-    Write-Verbose "XSLT FILE: $xsltFile"
-    Write-Verbose "XSLT FILE: $xmlSourceFile"
-    Write-Verbose "TARGET FILE: $OutputFile"
-    
+    Write-Debug ''
+    Write-Debug ('-' * 120)
+    Write-Debug "Convert XML Report"
+    Write-Debug ('-' * 120)
+    Write-Debug "Input file name:      $InputFile"
+    Write-Debug "Output file name:     $OutputFile"
+    Write-Debug "Input format:         $InputFormat"
+    Write-Debug "Output format:        $OutputFormat"
+    $xsltFile = "${Script:PesterRoot}\Functions\$InputFormat-$OutputFormat.xslt"
+    $fullInputFile = Resolve-Path $InputFile
+    if ($InputFile -ne $fullInputFile) {
+        Write-Debug "Full input file name: $fullInputFile"
+    }
+    Write-Debug "XSLT file:            $xsltFile"
+    Write-Debug ('-' * 120)
+
     $argList = New-Object System.Xml.Xsl.XsltArgumentList
-    
     foreach ($transformParameter in $TransformParameters.GetEnumerator()) {
         $argList.AddParam($transformParameter.Key, "", $transformParameter.Value)
+        Write-Debug "Parameter added: $($transformParameter.Key) => $($transformParameter.Value)"
     }
     
-    $output = New-Object System.IO.MemoryStream
+    $outputStream = New-Object System.IO.MemoryStream
     $xslt = New-Object System.Xml.Xsl.XslCompiledTransform
-
-    $reader = new-object System.IO.StreamReader($output)
+    $reader = new-object System.IO.StreamReader($outputStream)
     try {
-        $xslt.Load([string]$xsltFile)
-        $xslt.Transform($xmlSourceFile, $arglist, $output)
-        $output.position = 0
+        $xslt.Load([string] $xsltFile)
+        Write-Debug "XSLT file loaded"
+        $xslt.Transform($fullInputFile, $arglist, $outputStream)
+        Write-Debug "XML source file transformed"
+        $outputStream.position = 0
         $transformed = [string] $reader.ReadToEnd()
         $transformed > $OutputFile
+        Write-Debug "Output file written"
+        Write-Verbose "XML report $InputFile ($InputFormat) converted successfully to $OutputFile ($OutputFormat)"
     } finally {
         $reader.Close()
     }
-
+    Write-Debug ('-' * 120)
 }
