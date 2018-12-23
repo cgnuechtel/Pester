@@ -890,7 +890,7 @@ function ConvertTo-HtmlReport {
     #$htmlReport = "$PSScriptRoot\results\spec-run-windows.html"
     #. "$PSScriptRoot\Sources\Windows\Scripts\Convert-XmlWithXslt.ps1"
     Convert-XmlWithXslt $InputFile `
-                        "$PSScriptRoot\gherkin-html-report.xslt" `
+                        "${Script:PesterRoot}\Functions\gherkin-html-report.xslt" `
                         $OutputFile
 }
 
@@ -908,7 +908,7 @@ function Convert-XmlWithXslt($xmlSourceFile, $xsltFile, $xmlTargetFile) {
     
     # Resolve directory of XML target file to ensure that it is correct
     #Resolve-Path($xmlTargetFile) | Out-Null
-    $xslt = [System.Xml.Xsl.XslTransform]::new()
-    $xslt.Load($xsltFile)
+    $xslt = New-Object System.Xml.Xsl.XslTransform
+    $xslt.Load([string]$xsltFile)
     $xslt.Transform($xmlSourceFile, (Resolve-Path $xmlTargetFile))
 }
