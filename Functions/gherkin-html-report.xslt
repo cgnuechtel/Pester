@@ -16,7 +16,7 @@
       .success      { background-color: #C5D88A; }
       .inconclusive { background-color: #EAEC2D; }
       .failure      { background-color: #D88A8A; }
-      .failureMessage { background-color: #EDBBBB; color:black; margin:0px; padding:5pt 0pt 5pt 5pt;}
+      .failureMessage { background-color: #EDBBBB; color:black; margin:0px; padding:5pt 0pt 5pt 5pt; }
       hr { width: 100%; height: 1pt; margin:14pt 0px 0px 0px; color: grey; background: grey; }
       pre {
           font-family: Consolas,monospace;
@@ -29,8 +29,9 @@
       }
       table { border-spacing: 0; }
       td, th { padding: 0pt 5pt 0pt 0pt; }
-      th, td { text-align: right }
-      #overview { overflow:hidden }
+      th, td { text-align: right; }
+      td.left { text-align: left; }
+      #overview { overflow:hidden; }
       #results  { float: left; }
       #summary  { float: right; clear:right; }
     </style>
@@ -58,6 +59,22 @@
     <xsl:text>&lt;th class="success"&gt;Passed&lt;/th&gt;</xsl:text>
     <xsl:text>&lt;th class="inconclusive"&gt;Skipped&lt;/th&gt;</xsl:text>
     <xsl:text>&lt;th class="failure"&gt;Failed&lt;/th&gt;</xsl:text>
+    <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
+
+    <xsl:text>&lt;tr&gt;&lt;th&gt;Features:&lt;/th&gt;&lt;td&gt;</xsl:text>
+    <xsl:value-of select="count(node()/results/test-suite)"/>
+    <xsl:text>&lt;/td&gt;</xsl:text>
+
+    <xsl:text>&lt;td class="success"&gt;</xsl:text>
+    <xsl:value-of select="count(node()/results/test-suite[count(node()//test-case[@result='Success']) &gt; 0 and count(node()//test-case[@result='Success']) = count(node()//test-case)])"/>
+    <xsl:text>&lt;/td&gt;</xsl:text>
+
+    <xsl:text>&lt;td class="inconclusive"&gt;</xsl:text>
+    <xsl:value-of select="count(node()/results/test-suite[count(node()//test-case[@result='Inconclusive']) &gt; 0 and count(node()//test-case[@result='Failure']) = 0])"/>
+    <xsl:text>&lt;/td&gt;</xsl:text>
+
+    <xsl:text>&lt;td class="failure"&gt;</xsl:text>
+    <xsl:value-of select="count(node()/results/test-suite[count(node()//test-case[@result='Failure']) &gt; 0])"/>
     <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
 
     <xsl:text>&lt;tr&gt;&lt;th&gt;Scenarios:&lt;/th&gt;&lt;td&gt;</xsl:text>
@@ -98,15 +115,22 @@
 
     <xsl:text>&lt;table&gt;</xsl:text>
     
-    <xsl:text>&lt;tr&gt;&lt;th&gt;Operating system:&lt;/th&gt;&lt;td&gt;</xsl:text>
+    <xsl:text>&lt;tr&gt;&lt;th&gt;Operating system:&lt;/th&gt;&lt;td class="left"&gt;</xsl:text>
     <xsl:value-of select="substring-before(environment/@platform,'|')"/><xsl:text>&lt;/td&gt;&lt;/tr&gt;
     </xsl:text>
 
-    <xsl:text>&lt;tr&gt;&lt;th&gt;Version:&lt;/th&gt;&lt;td&gt;</xsl:text>
+    <xsl:text>&lt;tr&gt;&lt;th&gt;Version:&lt;/th&gt;&lt;td class="left"&gt;</xsl:text>
     <xsl:value-of select="environment/@os-version"/><xsl:text>&lt;/td&gt;&lt;/tr&gt;
     </xsl:text>
     
-    <xsl:text>&lt;tr&gt;&lt;th&gt;Execution time:&lt;/th&gt;&lt;td&gt;</xsl:text>
+    <xsl:text>&lt;tr&gt;&lt;th&gt;Date/time:&lt;/th&gt;&lt;td class="left"&gt;</xsl:text>
+    <xsl:value-of select="@date"/>
+    <xsl:text> </xsl:text>
+    <xsl:value-of select="@time"/>
+    <xsl:text>&lt;/td&gt;&lt;/tr&gt;
+    </xsl:text>
+    
+    <xsl:text>&lt;tr&gt;&lt;th&gt;Duration:&lt;/th&gt;&lt;td class="left"&gt;</xsl:text>
     <xsl:value-of select="test-suite/@time"/>
     <xsl:text> seconds&lt;/td&gt;&lt;/tr&gt;
     </xsl:text>
