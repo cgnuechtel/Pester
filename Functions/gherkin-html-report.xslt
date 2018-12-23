@@ -7,17 +7,26 @@
     <title>HTML Report</title>
     <style>
       body {
-        font-size: 14pt;
+        font-size: 12pt;
         font-family: Georgia;
       }
-      h1 { font-size:18pt; margin:14pt 0pt 0pt 0pt; padding:0pt 0pt 4pt 0pt; }
-      details { font-size:14pt; margin:7pt; padding:7pt 14pt 7pt 14pt; }
-      h2 { font-size:14pt; margin:12pt 0pt 0pt 0pt; padding:0pt 0pt 3pt 0pt; }
+      h1 { font-size:16pt; margin:14pt 0pt 0pt 0pt; padding:0pt 0pt 4pt 0pt; }
+      details { font-size:12pt; margin:7pt; padding:7pt 14pt 7pt 14pt; }
+      h2 { font-size:12pt; margin:12pt 0pt 0pt 0pt; padding:0pt 0pt 3pt 0pt; }
       .success      { background-color: #C5D88A; }
       .inconclusive { background-color: #EAEC2D; }
       .failure      { background-color: #D88A8A; }
       .failureMessage { background-color: #EDBBBB; color:black; margin:0px; padding:5pt 0pt 5pt 5pt;}
       hr { width: 100%; height: 1pt; margin:14pt 0px 0px 0px; color: grey; background: grey; }
+      pre {
+          font-family: Consolas,monospace;
+          font-size: 12pt;
+          white-space: pre-wrap;
+          white-space: -moz-pre-wrap;
+          white-space: -pre-wrap;
+          white-space: -o-pre-wrap;
+          word-wrap: break-word;
+      }
     </style>
   </head>
   <body>
@@ -32,7 +41,7 @@
 
   <!-- Transformation for root element -->
   <xsl:template match="test-results">
-    <xsl:text>&lt;b&gt;Scenario steps: </xsl:text><xsl:value-of select="@total"/>
+    <xsl:text>&lt;strong&gt;Scenario steps: </xsl:text><xsl:value-of select="@total"/>
     <xsl:text>, Errors: </xsl:text>
     <xsl:value-of select="@failures"/>
     <xsl:if test="@inconclusive">
@@ -41,7 +50,7 @@
     </xsl:if>
     <xsl:text>&lt;br&gt;Execution time: </xsl:text>
     <xsl:value-of select="test-suite/@time"/>
-    <xsl:text> seconds&lt;/b&gt;
+    <xsl:text> seconds&lt;/strong&gt;
     </xsl:text>
 
     <!-- Apply test-results transformation -->
@@ -76,8 +85,9 @@
       </xsl:choose>
       <xsl:text><![CDATA[">
       <summary>]]></xsl:text>
-      <xsl:text>&lt;b&gt;Scenario:&lt;/b&gt; </xsl:text>
+      <xsl:text>&lt;strong&gt;</xsl:text>
       <xsl:value-of select="@name"/>
+      <xsl:text>&lt;/strong&gt;</xsl:text>
       <xsl:text>&lt;/summary&gt;
       </xsl:text>
 
