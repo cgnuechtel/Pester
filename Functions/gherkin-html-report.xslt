@@ -27,6 +27,9 @@
           white-space: -o-pre-wrap;
           word-wrap: break-word;
       }
+      table { border-spacing: 0; }
+      td, th { padding: 0pt 5pt 0pt 0pt; }
+      th, td { text-align: right }
     </style>
   </head>
   <body>
@@ -41,17 +44,42 @@
 
   <!-- Transformation for root element -->
   <xsl:template match="test-results">
-    <xsl:text>&lt;strong&gt;Scenario steps: </xsl:text><xsl:value-of select="@total"/>
-    <xsl:text>, Errors: </xsl:text>
-    <xsl:value-of select="@failures"/>
-    <xsl:if test="@inconclusive">
-      <xsl:text>, Skipped: </xsl:text>
-      <xsl:value-of select="@inconclusive"/>
-    </xsl:if>
-    <xsl:text>&lt;br&gt;Execution time: </xsl:text>
+  
+    <xsl:text>&lt;table&gt;</xsl:text>
+
+    <xsl:text>&lt;tr&gt;&lt;th&gt;Number of scenarios:&lt;/th&gt;&lt;td&gt;</xsl:text>
+    <xsl:value-of select="count(node()/results/test-suite/results/test-suite)"/>
+    <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
+
+    <xsl:text>&lt;tr&gt;&lt;th&gt;Passed:&lt;/th&gt;&lt;td class="success"&gt;</xsl:text>
+    <xsl:value-of select="count(node()/results/test-suite/results/test-suite[count(node()//test-case[@result='Success']) &gt; 0 and count(node()//test-case[@result='Success']) = count(node()//test-case)])"/>
+    <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
+
+    <xsl:text>&lt;tr&gt;&lt;th&gt;Failed:&lt;/th&gt;&lt;td class="failure"&gt;</xsl:text>
+    <xsl:value-of select="count(node()/results/test-suite/results/test-suite[count(node()//test-case[@result='Failure']) &gt; 0 or count(node()//test-case[@result='Inconclusive']) &gt; 0])"/>
+    <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
+
+    <xsl:text>&lt;tr&gt;&lt;th&gt;Number of steps:&lt;/th&gt;&lt;td&gt;</xsl:text>
+    <xsl:value-of select="count(//test-case)"/>
+    <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
+
+    <xsl:text>&lt;tr&gt;&lt;th&gt;Passed:&lt;/th&gt;&lt;td class="success"&gt;</xsl:text>
+    <xsl:value-of select="count(//test-case[@result='Success'])"/>
+    <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
+
+    <xsl:text>&lt;tr&gt;&lt;th&gt;Inconclusive:&lt;/th&gt;&lt;td class="inconclusive"&gt;</xsl:text>
+    <xsl:value-of select="count(//test-case[@result='Inconclusive'])"/>
+    <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
+
+    <xsl:text>&lt;tr&gt;&lt;th&gt;Failed:&lt;/th&gt;&lt;td class="failure"&gt;</xsl:text>
+    <xsl:value-of select="count(//test-case[@result='Failure'])"/>
+    <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
+
+    <xsl:text>&lt;tr&gt;&lt;th&gt;Execution time:&lt;/th&gt;&lt;td&gt;</xsl:text>
     <xsl:value-of select="test-suite/@time"/>
-    <xsl:text> seconds&lt;/strong&gt;
-    </xsl:text>
+    <xsl:text> seconds&lt;/td&gt;&lt;/tr&gt;</xsl:text>
+
+    <xsl:text>&lt;/table&gt;</xsl:text>
 
     <!-- Apply test-results transformation -->
     <xsl:apply-templates/>
@@ -72,7 +100,7 @@
       <!-- Use HTML element details to make scenarios expandable and collapsable -->
       <xsl:text><![CDATA[<details]]></xsl:text>
       <xsl:choose>
-        <xsl:when test="count(node()//test-case[@result='Success']) &gt; 0 and count(node()//test-case[@result='Success']) = count(node()//test-case) - count(node()//test-case[@result='Inconclusive'])">
+        <xsl:when test="count(node()//test-case[@result='Success']) &gt; 0 and count(node()//test-case[@result='Success']) = count(node()//test-case)">
           <xsl:text> class="success</xsl:text>
         </xsl:when>
         <xsl:when test="count(node()//test-case[@result='Failure']) &gt; 0">
