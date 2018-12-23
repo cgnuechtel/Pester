@@ -31,7 +31,10 @@ function Export-PesterResults
     param (
         $PesterState,
         [string] $Path,
-        [string] $Format
+        [string] $Format,
+        [string] $TransformPath,
+        [string] $TransformFormat,
+        [switch] $TransformGherkin
     )
 
     switch ($Format)
@@ -42,6 +45,22 @@ function Export-PesterResults
         {
             throw "'$Format' is not a valid Pester export format."
         }
+    }
+    
+    if ($TransformPath) {
+        if ($TransformGherkin) {
+            # Slightly different content for Gherkin in the transformed text
+            $TransformParameters = @{
+                testRunTitle = "Pester Gherkin Run"
+                mainGroupName = "Features"
+                subGroupName = "Scenarios"
+                singleGroupName = "Steps"
+            }
+        } else {
+            # Default values
+            $TransformParameters = @{}
+        }
+        Convert-Report -InputFile $Path -OutputFile $TransformPath -InputFormat $Format -OutputFormat $TransformFormat -TransformParameters $TransformParameters
     }
 }
 function Export-NUnitReport {
@@ -504,4 +523,61 @@ function Get-GroupResult ($InputObject)
     if ($InputObject.SkippedCount -gt 0) { return 'Ignored' }
     if ($InputObject.PendingCount -gt 0) { return 'Inconclusive' }
     return 'Success'
+}
+
+function Convert-Report {
+<#
+    .SYNOPSIS
+        Converts a XML test result report into a more human-friendly format like HTML
+
+    .PARAMETER Inconclusive
+    Sets the test result to inconclusive. Cannot be used at the same time as -Pending or -Skipped
+
+    .PARAMETER Pending
+    Sets the test result to pending. Cannot be used at the same time as -Inconclusive or -Skipped
+
+    .PARAMETER Skipped
+    Sets the test result to skipped. Cannot be used at the same time as -Inconclusive or -Pending
+
+    .PARAMETER Because
+    Similarily to failing tests, skipped and inconclusive tests should have reason. It allows
+    to provide information to the user why the test is neither successful nor failed.
+#>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)][string]$InputFile,
+        [Parameter(Mandatory=$true)][string]$OutputFile,
+        [Parameter(Mandatory=$true)][string]$InputFormat,
+        [Parameter(Mandatory=$true)][string]$OutputFormat,
+        [hashtable]$TransformParameters = @{}
+    )
+    
+    $xsltFile = "${Script:PesterRoot}\Functions\$InputFormat-$OutputFormat.xslt"
+
+    $xmlSourceFile = Resolve-Path $InputFile
+    
+    Write-Verbose "XSLT FILE: $xsltFile"
+    Write-Verbose "XSLT FILE: $xmlSourceFile"
+    Write-Verbose "TARGET FILE: $OutputFile"
+    
+    $argList = New-Object System.Xml.Xsl.XsltArgumentList
+    
+    foreach ($transformParameter in $TransformParameters.GetEnumerator()) {
+        $argList.AddParam($transformParameter.Key, "", $transformParameter.Value)
+    }
+    
+    $output = New-Object System.IO.MemoryStream
+    $xslt = New-Object System.Xml.Xsl.XslCompiledTransform
+
+    $reader = new-object System.IO.StreamReader($output)
+    try {
+        $xslt.Load([string]$xsltFile)
+        $xslt.Transform($xmlSourceFile, $arglist, $output)
+        $output.position = 0
+        $transformed = [string] $reader.ReadToEnd()
+        $transformed > $OutputFile
+    } finally {
+        $reader.Close()
+    }
+
 }

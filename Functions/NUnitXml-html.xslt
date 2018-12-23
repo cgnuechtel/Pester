@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+  <xsl:param name="testRunTitle" select="'Pester Spec Run'" />
+  <xsl:param name="mainGroupName" select="'Files'" />
+  <xsl:param name="subGroupName" select="'Groups'" />
+  <xsl:param name="singleGroupName" select="'Specs'" />
+
   <xsl:output method='text'/>
   <xsl:template match="/"><![CDATA[<!DOCTYPE html>
 <html>
@@ -36,8 +42,10 @@
       #summary  { float: right; clear:right; }
     </style>
   </head>
-  <body>
-    <h1>Pester Gherkin Run</h1>]]>
+  <body>]]>
+    <xsl:text>&lt;h1&gt;</xsl:text>
+    <xsl:value-of select="$testRunTitle" />
+    <xsl:text>&lt;/h1&gt;</xsl:text>
     <!-- Apply root element transformation -->
     <xsl:apply-templates select="//test-results" />
 <![CDATA[
@@ -61,7 +69,9 @@
     <xsl:text>&lt;th class="failure"&gt;Failed&lt;/th&gt;</xsl:text>
     <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
 
-    <xsl:text>&lt;tr&gt;&lt;th&gt;Features:&lt;/th&gt;&lt;td&gt;</xsl:text>
+    <xsl:text>&lt;tr&gt;&lt;th&gt;</xsl:text>
+    <xsl:value-of select="$mainGroupName" />
+    <xsl:text>:&lt;/th&gt;&lt;td&gt;</xsl:text>
     <xsl:value-of select="count(node()/results/test-suite)"/>
     <xsl:text>&lt;/td&gt;</xsl:text>
 
@@ -77,7 +87,9 @@
     <xsl:value-of select="count(node()/results/test-suite[count(node()//test-case[@result='Failure']) &gt; 0])"/>
     <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
 
-    <xsl:text>&lt;tr&gt;&lt;th&gt;Scenarios:&lt;/th&gt;&lt;td&gt;</xsl:text>
+    <xsl:text>&lt;tr&gt;&lt;th&gt;</xsl:text>
+    <xsl:value-of select="$subGroupName" />
+    <xsl:text>:&lt;/th&gt;&lt;td&gt;</xsl:text>
     <xsl:value-of select="count(node()/results/test-suite/results/test-suite)"/>
     <xsl:text>&lt;/td&gt;</xsl:text>
 
@@ -93,7 +105,9 @@
     <xsl:value-of select="count(node()/results/test-suite/results/test-suite[count(node()//test-case[@result='Failure']) &gt; 0])"/>
     <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
 
-    <xsl:text>&lt;tr&gt;&lt;th&gt;Steps:&lt;/th&gt;&lt;td&gt;</xsl:text>
+    <xsl:text>&lt;tr&gt;&lt;th&gt;</xsl:text>
+    <xsl:value-of select="$singleGroupName" />
+    <xsl:text>:&lt;/th&gt;&lt;td&gt;</xsl:text>
     <xsl:value-of select="count(//test-case)"/>
     <xsl:text>&lt;/td&gt;</xsl:text>
 

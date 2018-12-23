@@ -66,7 +66,7 @@ FunctionsToExport = @(
     'AfterEachFeature'
     'BeforeEachScenario'
     'AfterEachScenario'
-    'ConvertTo-HtmlReport'
+    'Convert-Report'
 )
 
 # # Cmdlets to export from this module

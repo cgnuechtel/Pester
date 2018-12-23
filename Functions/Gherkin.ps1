@@ -108,6 +108,12 @@ function Invoke-Gherkin {
         .PARAMETER OutputFormat
             The format for output (LegacyNUnitXml or NUnitXml), defaults to NUnitXml
 
+        .PARAMETER TransformFile
+            The path where the written report file is tranformed to. If this path is not provided, no transformation will be executed.
+
+        .PARAMETER TransformFormat
+            The format for the transformed output, defaults to html
+
         .PARAMETER Quiet
             Disables the output Pester writes to screen. No other output is generated unless you specify PassThru,
             or one of the Output parameters.
@@ -212,6 +218,11 @@ function Invoke-Gherkin {
         [ValidateSet('NUnitXml')]
         [string] $OutputFormat = 'NUnitXml',
 
+        [string] $TransformFile,
+
+        [ValidateSet('html')]
+        [string] $TransformFormat = 'html',
+
         [Switch]$Quiet,
 
         [object]$PesterOption,
@@ -297,7 +308,7 @@ function Invoke-Gherkin {
         Exit-CoverageAnalysis -PesterState $pester
 
         if (& $SafeCommands["Get-Variable"]-Name OutputFile -ValueOnly -ErrorAction $script:IgnoreErrorPreference) {
-            Export-PesterResults -PesterState $pester -Path $OutputFile -Format $OutputFormat
+            Export-PesterResults -PesterState $pester -Path $OutputFile -Format $OutputFormat -TransformPath $TransformFile -TransformFormat $TransformFormat -TransformGherkin
         }
 
         if ($PassThru) {
@@ -848,67 +859,4 @@ function ConvertTo-HashTableArray {
     end {
         ${Result Table}
     }
-}
-
-
-
-function ConvertTo-HtmlReport {
-<#
-    .SYNOPSIS
-    Converts a XML report in the human-friendly HTML format
-
-    .DESCRIPTION
-    
-
-    .PARAMETER Inconclusive
-    Sets the test result to inconclusive. Cannot be used at the same time as -Pending or -Skipped
-
-    .PARAMETER Pending
-    Sets the test result to pending. Cannot be used at the same time as -Inconclusive or -Skipped
-
-    .PARAMETER Skipped
-    Sets the test result to skipped. Cannot be used at the same time as -Inconclusive or -Pending
-
-    .PARAMETER Because
-    Similarily to failing tests, skipped and inconclusive tests should have reason. It allows
-    to provide information to the user why the test is neither successful nor failed.
-
-    .EXAMPLE
-    bla bla
-
-    .EXAMPLE
-    blub blub
-
-#>
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory=$true)][string]$InputFile,
-        [Parameter(Mandatory=$true)][string]$OutputFile
-    )
-
-# Create HTML report from created XML files
-    #$htmlReport = "$PSScriptRoot\results\spec-run-windows.html"
-    #. "$PSScriptRoot\Sources\Windows\Scripts\Convert-XmlWithXslt.ps1"
-    Convert-XmlWithXslt $InputFile `
-                        "${Script:PesterRoot}\Functions\gherkin-html-report.xslt" `
-                        $OutputFile
-}
-
-
-  
-
-
-function Convert-XmlWithXslt($xmlSourceFile, $xsltFile, $xmlTargetFile) {
-    $xsltFile = Resolve-Path $xsltFile 
-    $xmlSourceFile = Resolve-Path $xmlSourceFile
-    
-    Write-Host -Fo "Magenta" "XSLT FILE: $xsltFile"
-    Write-Host -Fo "Magenta" "XSLT FILE: $xmlSourceFile"
-    Write-Host -Fo "Magenta" "TARGET FILE: $xmlTargetFile"
-    
-    # Resolve directory of XML target file to ensure that it is correct
-    #Resolve-Path($xmlTargetFile) | Out-Null
-    $xslt = New-Object System.Xml.Xsl.XslTransform
-    $xslt.Load([string]$xsltFile)
-    $xslt.Transform($xmlSourceFile, $xmlTargetFile)
 }
