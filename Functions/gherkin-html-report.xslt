@@ -30,6 +30,9 @@
       table { border-spacing: 0; }
       td, th { padding: 0pt 5pt 0pt 0pt; }
       th, td { text-align: right }
+      #overview { overflow:hidden }
+      #results  { float: left; }
+      #summary  { float: right; clear:right; }
     </style>
   </head>
   <body>
@@ -45,45 +48,70 @@
   <!-- Transformation for root element -->
   <xsl:template match="test-results">
   
+    <xsl:text>&lt;div id="overview"&gt;</xsl:text>
+    <xsl:text>&lt;div id="results"&gt;</xsl:text>
+    <!--<xsl:text>&lt;h2&gt;Test results&lt;/h2&gt;</xsl:text>-->
     <xsl:text>&lt;table&gt;</xsl:text>
 
-    <xsl:text>&lt;tr&gt;&lt;th&gt;Number of scenarios:&lt;/th&gt;&lt;td&gt;</xsl:text>
+    <xsl:text>&lt;tr&gt;&lt;td&gt;&amp;nbsp;&lt;/td&gt;</xsl:text>
+    <xsl:text>&lt;th&gt;Total&lt;/th&gt;</xsl:text>
+    <xsl:text>&lt;th class="success"&gt;Passed&lt;/th&gt;</xsl:text>
+    <xsl:text>&lt;th class="inconclusive"&gt;Skipped&lt;/th&gt;</xsl:text>
+    <xsl:text>&lt;th class="failure"&gt;Failed&lt;/th&gt;</xsl:text>
+    <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
+
+    <xsl:text>&lt;tr&gt;&lt;th&gt;Scenarios:&lt;/th&gt;&lt;td&gt;</xsl:text>
     <xsl:value-of select="count(node()/results/test-suite/results/test-suite)"/>
-    <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
+    <xsl:text>&lt;/td&gt;</xsl:text>
 
-    <xsl:text>&lt;tr&gt;&lt;th&gt;Passed:&lt;/th&gt;&lt;td class="success"&gt;</xsl:text>
+    <xsl:text>&lt;td class="success"&gt;</xsl:text>
     <xsl:value-of select="count(node()/results/test-suite/results/test-suite[count(node()//test-case[@result='Success']) &gt; 0 and count(node()//test-case[@result='Success']) = count(node()//test-case)])"/>
-    <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
+    <xsl:text>&lt;/td&gt;</xsl:text>
 
-    <xsl:text>&lt;tr&gt;&lt;th&gt;Inconclusive:&lt;/th&gt;&lt;td class="inconclusive"&gt;</xsl:text>
+    <xsl:text>&lt;td class="inconclusive"&gt;</xsl:text>
     <xsl:value-of select="count(node()/results/test-suite/results/test-suite[count(node()//test-case[@result='Inconclusive']) &gt; 0 and count(node()//test-case[@result='Failure']) = 0])"/>
-    <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
+    <xsl:text>&lt;/td&gt;</xsl:text>
 
-    <xsl:text>&lt;tr&gt;&lt;th&gt;Failed:&lt;/th&gt;&lt;td class="failure"&gt;</xsl:text>
+    <xsl:text>&lt;td class="failure"&gt;</xsl:text>
     <xsl:value-of select="count(node()/results/test-suite/results/test-suite[count(node()//test-case[@result='Failure']) &gt; 0])"/>
     <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
 
-    <xsl:text>&lt;tr&gt;&lt;th&gt;Number of steps:&lt;/th&gt;&lt;td&gt;</xsl:text>
+    <xsl:text>&lt;tr&gt;&lt;th&gt;Steps:&lt;/th&gt;&lt;td&gt;</xsl:text>
     <xsl:value-of select="count(//test-case)"/>
-    <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
+    <xsl:text>&lt;/td&gt;</xsl:text>
 
-    <xsl:text>&lt;tr&gt;&lt;th&gt;Passed:&lt;/th&gt;&lt;td class="success"&gt;</xsl:text>
+    <xsl:text>&lt;td class="success"&gt;</xsl:text>
     <xsl:value-of select="count(//test-case[@result='Success'])"/>
-    <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
+    <xsl:text>&lt;/td&gt;</xsl:text>
 
-    <xsl:text>&lt;tr&gt;&lt;th&gt;Inconclusive:&lt;/th&gt;&lt;td class="inconclusive"&gt;</xsl:text>
+    <xsl:text>&lt;td class="inconclusive"&gt;</xsl:text>
     <xsl:value-of select="count(//test-case[@result='Inconclusive'])"/>
-    <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
+    <xsl:text>&lt;/td&gt;</xsl:text>
 
-    <xsl:text>&lt;tr&gt;&lt;th&gt;Failed:&lt;/th&gt;&lt;td class="failure"&gt;</xsl:text>
+    <xsl:text>&lt;td class="failure"&gt;</xsl:text>
     <xsl:value-of select="count(//test-case[@result='Failure'])"/>
     <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
+    <xsl:text>&lt;/table&gt;&lt;/div&gt;</xsl:text>
 
+    <xsl:text>&lt;div id="summary"&gt;</xsl:text>
+    <!--<xsl:text>&lt;h2&gt;Summary&lt;/h2&gt;</xsl:text>-->
+
+    <xsl:text>&lt;table&gt;</xsl:text>
+    
+    <xsl:text>&lt;tr&gt;&lt;th&gt;Operating system:&lt;/th&gt;&lt;td&gt;</xsl:text>
+    <xsl:value-of select="substring-before(environment/@platform,'|')"/><xsl:text>&lt;/td&gt;&lt;/tr&gt;
+    </xsl:text>
+
+    <xsl:text>&lt;tr&gt;&lt;th&gt;Version:&lt;/th&gt;&lt;td&gt;</xsl:text>
+    <xsl:value-of select="environment/@os-version"/><xsl:text>&lt;/td&gt;&lt;/tr&gt;
+    </xsl:text>
+    
     <xsl:text>&lt;tr&gt;&lt;th&gt;Execution time:&lt;/th&gt;&lt;td&gt;</xsl:text>
     <xsl:value-of select="test-suite/@time"/>
-    <xsl:text> seconds&lt;/td&gt;&lt;/tr&gt;</xsl:text>
+    <xsl:text> seconds&lt;/td&gt;&lt;/tr&gt;
+    </xsl:text>
 
-    <xsl:text>&lt;/table&gt;</xsl:text>
+    <xsl:text>&lt;/table&gt;&lt;/div&gt;&lt;/div&gt;</xsl:text>
 
     <!-- Apply test-results transformation -->
     <xsl:apply-templates/>
