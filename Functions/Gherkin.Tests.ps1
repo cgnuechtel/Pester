@@ -760,7 +760,7 @@ Describe "A transformed HTML report" -Tag Gherkin {
     }
 
     It 'should contain the expected number of scenarios' {
-        Get-XmlCount $scenariosXPath | Should -Be 8
+        Get-XmlCount $scenariosXPath | Should -Be 10
     }
 
     It 'should contain the expected number of steps' {
@@ -782,8 +782,8 @@ Describe "A transformed HTML report" -Tag Gherkin {
         $feature1Scenario4XPath = "$scenariosXPath[4]"
 
         Get-XmlInnerText "$feature1Scenario1XPath/summary/strong" | Should -Be "Scenario 1"
-        Get-XmlInnerText "$feature1Scenario2XPath/summary/strong" | Should -Match "(?s)Scenario 2.+Examples 1"
-        Get-XmlInnerText "$feature1Scenario3XPath/summary/strong" | Should -Match "(?s)Scenario 2.+Examples 2"
+        Get-XmlInnerText "$feature1Scenario2XPath/summary/strong" | Should -Be "Scenario 2 [Examples 1 1]"
+        Get-XmlInnerText "$feature1Scenario3XPath/summary/strong" | Should -Be "Scenario 2 [Examples 2 1]"
         Get-XmlInnerText "$feature1Scenario4XPath/summary/strong" | Should -Be "Scenario 3"
 
         Get-XmlValue "$feature1Scenario1XPath/@class" | Should -BeExactly "success"
@@ -797,16 +797,22 @@ Describe "A transformed HTML report" -Tag Gherkin {
         $feature2Scenario2XPath = "$scenariosXPath[6]"
         $feature2Scenario3XPath = "$scenariosXPath[7]"
         $feature2Scenario4XPath = "$scenariosXPath[8]"
+        $feature2Scenario5XPath = "$scenariosXPath[9]"
+        $feature2Scenario6XPath = "$scenariosXPath[10]"
 
         Get-XmlInnerText "$feature2Scenario1XPath/summary/strong" | Should -Be "Scenario 4"
-        Get-XmlInnerText "$feature2Scenario2XPath/summary/strong" | Should -Match "(?s)Scenario 5.+Examples 1"
-        Get-XmlInnerText "$feature2Scenario3XPath/summary/strong" | Should -Match "(?s)Scenario 5.+Examples 2"
-        Get-XmlInnerText "$feature2Scenario4XPath/summary/strong" | Should -Match "(?s)Scenario 5.+Examples 3"
+        Get-XmlInnerText "$feature2Scenario2XPath/summary/strong" | Should -Be "Scenario 5 [Examples 1 1]"
+        Get-XmlInnerText "$feature2Scenario3XPath/summary/strong" | Should -Be "Scenario 5 [Examples 2 1]"
+        Get-XmlInnerText "$feature2Scenario4XPath/summary/strong" | Should -Be "Scenario 5 [Examples 3 1]"
+        Get-XmlInnerText "$feature2Scenario5XPath/summary/strong" | Should -Be "Scenario 5 [Examples 3 2]"
+        Get-XmlInnerText "$feature2Scenario6XPath/summary/strong" | Should -Be "Scenario 5 [Examples 3 3]"
 
         Get-XmlValue "$feature2Scenario1XPath/@class" | Should -Be "failure"
-        Get-XmlValue "$feature2Scenario2XPath/@class" | Should -Be "failure"
-        Get-XmlValue "$feature2Scenario3XPath/@class" | Should -Be "failure"
+        Get-XmlValue "$feature2Scenario2XPath/@class" | Should -Be "inconclusive"
+        Get-XmlValue "$feature2Scenario3XPath/@class" | Should -Be "inconclusive"
         Get-XmlValue "$feature2Scenario4XPath/@class" | Should -Be "failure"
+        Get-XmlValue "$feature2Scenario5XPath/@class" | Should -Be "inconclusive"
+        Get-XmlValue "$feature2Scenario6XPath/@class" | Should -Be "inconclusive"
     }
 
     It 'should contain all steps of scenario 1 with correct names and test results' {
@@ -840,9 +846,10 @@ Describe "A transformed HTML report" -Tag Gherkin {
         Get-XmlValue "$scenario2Examples1StepsXPath[3]/@class" | Should -BeExactly "success"
         Get-XmlValue "$scenario2Examples1StepsXPath[4]/@class" | Should -BeExactly "success"
         Get-XmlValue "$scenario2Examples1StepsXPath[5]/@class" | Should -BeExactly "failure"
-        Get-XmlValue "$scenario2Examples1StepsXPath[6]/@class" | Should -BeExactly "success"
+        Get-XmlValue "$scenario2Examples1StepsXPath[6]/@class" | Should -BeExactly "inconclusive"
 
         Get-NextPreText "$scenario2Examples1StepsXPath[5]" | Should -Be "An example error in the then clause"
+        Get-NextPreText "$scenario2Examples1StepsXPath[6]" | Should -Be "Step skipped (previous step did not pass)"
     }
 
     It 'should contain all steps of scenario 2 (examples 2) with correct names and test results' {
@@ -872,8 +879,8 @@ Describe "A transformed HTML report" -Tag Gherkin {
 
         Get-XmlInnerText "$scenario3StepsXPath[1]" | Should -Be "Given step_301"
         Get-XmlInnerText "$scenario3StepsXPath[2]" | Should -Be "When step_302"
-        Get-XmlInnerText "$scenario3StepsXPath[4]" | Should -Be "Then step_303"
-        Get-XmlInnerText "$scenario3StepsXPath[3]" | Should -Be "When step_302"
+        Get-XmlInnerText "$scenario3StepsXPath[3]" | Should -Be "Then step_303"
+        Get-XmlInnerText "$scenario3StepsXPath[4]" | Should -Be "When step_302"
         Get-XmlInnerText "$scenario3StepsXPath[5]" | Should -Be "Then step_304"
 
         Get-XmlValue "$scenario3StepsXPath[1]/@class" | Should -BeExactly "success"
@@ -896,9 +903,10 @@ Describe "A transformed HTML report" -Tag Gherkin {
 
         Get-XmlValue "$scenario4StepsXPath[1]/@class" | Should -BeExactly "success"
         Get-XmlValue "$scenario4StepsXPath[2]/@class" | Should -BeExactly "failure"
-        Get-XmlValue "$scenario4StepsXPath[3]/@class" | Should -BeExactly "success"
+        Get-XmlValue "$scenario4StepsXPath[3]/@class" | Should -BeExactly "inconclusive"
 
         Get-NextPreText "$scenario4StepsXPath[2]" | Should -Be "An example error in the when clause"
+        Get-NextPreText "$scenario4StepsXPath[3]" | Should -Be "Step skipped (previous step did not pass)"
     }
 
     It 'should contain all steps of scenario 5 (examples 1) with correct names and test results' {
@@ -910,13 +918,13 @@ Describe "A transformed HTML report" -Tag Gherkin {
         Get-XmlInnerText "$scenario5Examples1StepsXPath[2]" | Should -Be "When step_502"
         Get-XmlInnerText "$scenario5Examples1StepsXPath[3]" | Should -Be "Then step_503"
 
-        Get-XmlValue "$scenario5Examples1StepsXPath[1]/@class" | Should -BeExactly "failure"
-        Get-XmlValue "$scenario5Examples1StepsXPath[2]/@class" | Should -BeExactly "failure"
-        Get-XmlValue "$scenario5Examples1StepsXPath[3]/@class" | Should -BeExactly "failure"
+        Get-XmlValue "$scenario5Examples1StepsXPath[1]/@class" | Should -BeExactly "inconclusive"
+        Get-XmlValue "$scenario5Examples1StepsXPath[2]/@class" | Should -BeExactly "inconclusive"
+        Get-XmlValue "$scenario5Examples1StepsXPath[3]/@class" | Should -BeExactly "inconclusive"
 
-        Get-NextPreText "$scenario5Examples1StepsXPath[1]" | Should -BeLike "*New-InconclusiveErrorRecord*"
-        Get-NextPreText "$scenario5Examples1StepsXPath[2]" | Should -BeLike "*New-InconclusiveErrorRecord*"
-        Get-NextPreText "$scenario5Examples1StepsXPath[3]" | Should -BeLike "*New-InconclusiveErrorRecord*"
+        Get-NextPreText "$scenario5Examples1StepsXPath[1]" | Should -Be "Could not find implementation for step!"
+        Get-NextPreText "$scenario5Examples1StepsXPath[2]" | Should -Be "Could not find implementation for step!"
+        Get-NextPreText "$scenario5Examples1StepsXPath[3]" | Should -Be "Could not find implementation for step!"
     }
 
     It 'should contain all steps of scenario 5 (examples 2) with correct names and test results' {
@@ -928,47 +936,53 @@ Describe "A transformed HTML report" -Tag Gherkin {
         Get-XmlInnerText "$scenario5Examples2StepsXPath[2]" | Should -Be "When step_602"
         Get-XmlInnerText "$scenario5Examples2StepsXPath[3]" | Should -Be "Then step_603"
 
-        Get-XmlValue "$scenario5Examples2StepsXPath[1]/@class" | Should -BeExactly "failure"
-        Get-XmlValue "$scenario5Examples2StepsXPath[2]/@class" | Should -BeExactly "failure"
-        Get-XmlValue "$scenario5Examples2StepsXPath[3]/@class" | Should -BeExactly "failure"
+        Get-XmlValue "$scenario5Examples2StepsXPath[1]/@class" | Should -BeExactly "inconclusive"
+        Get-XmlValue "$scenario5Examples2StepsXPath[2]/@class" | Should -BeExactly "inconclusive"
+        Get-XmlValue "$scenario5Examples2StepsXPath[3]/@class" | Should -BeExactly "inconclusive"
 
-        Get-NextPreText "$scenario5Examples2StepsXPath[1]" | Should -BeLike "*New-InconclusiveErrorRecord*"
-        Get-NextPreText "$scenario5Examples2StepsXPath[2]" | Should -BeLike "*New-InconclusiveErrorRecord*"
-        Get-NextPreText "$scenario5Examples2StepsXPath[3]" | Should -BeLike "*New-InconclusiveErrorRecord*"
+        Get-NextPreText "$scenario5Examples2StepsXPath[1]" | Should -Be "Could not find implementation for step!"
+        Get-NextPreText "$scenario5Examples2StepsXPath[2]" | Should -Be "Could not find implementation for step!"
+        Get-NextPreText "$scenario5Examples2StepsXPath[3]" | Should -Be "Could not find implementation for step!"
     }
 
     It 'should contain all steps of scenario 5 (examples 3) with correct names and test results' {
-        $scenario5Examples3StepsXPath = "$scenariosXPath[8]/div"
+        $scenario5Examples3aStepsXPath = "$scenariosXPath[8]/div"
+        $scenario5Examples3bStepsXPath = "$scenariosXPath[9]/div"
+        $scenario5Examples3cStepsXPath = "$scenariosXPath[10]/div"
 
-        Get-XmlCount $scenario5Examples3StepsXPath | Should -Be 9
+        Get-XmlCount $scenario5Examples3aStepsXPath | Should -Be 3
+        Get-XmlCount $scenario5Examples3bStepsXPath | Should -Be 3
+        Get-XmlCount $scenario5Examples3cStepsXPath | Should -Be 3
 
-        Get-XmlInnerText "$scenario5Examples3StepsXPath[1]" | Should -Be "Given step_701"
-        Get-XmlInnerText "$scenario5Examples3StepsXPath[2]" | Should -Be "When step_702"
-        Get-XmlInnerText "$scenario5Examples3StepsXPath[3]" | Should -Be "Then step_703"
-        Get-XmlInnerText "$scenario5Examples3StepsXPath[4]" | Should -Be "Given step_801"
-        Get-XmlInnerText "$scenario5Examples3StepsXPath[5]" | Should -Be "When step_802"
-        Get-XmlInnerText "$scenario5Examples3StepsXPath[6]" | Should -Be "Then step_803"
-        Get-XmlInnerText "$scenario5Examples3StepsXPath[7]" | Should -Be "Given step_901"
-        Get-XmlInnerText "$scenario5Examples3StepsXPath[8]" | Should -Be "When step_902"
-        Get-XmlInnerText "$scenario5Examples3StepsXPath[9]" | Should -Be "Then step_903"
+        Get-XmlInnerText "$scenario5Examples3aStepsXPath[1]" | Should -Be "Given step_701"
+        Get-XmlInnerText "$scenario5Examples3aStepsXPath[2]" | Should -Be "When step_702"
+        Get-XmlInnerText "$scenario5Examples3aStepsXPath[3]" | Should -Be "Then step_703"
+        Get-XmlInnerText "$scenario5Examples3bStepsXPath[1]" | Should -Be "Given step_801"
+        Get-XmlInnerText "$scenario5Examples3bStepsXPath[2]" | Should -Be "When step_802"
+        Get-XmlInnerText "$scenario5Examples3bStepsXPath[3]" | Should -Be "Then step_803"
+        Get-XmlInnerText "$scenario5Examples3cStepsXPath[1]" | Should -Be "Given step_901"
+        Get-XmlInnerText "$scenario5Examples3cStepsXPath[2]" | Should -Be "When step_902"
+        Get-XmlInnerText "$scenario5Examples3cStepsXPath[3]" | Should -Be "Then step_903"
 
-        Get-XmlValue "$scenario5Examples3StepsXPath[1]/@class" | Should -Be "failure"
-        Get-XmlValue "$scenario5Examples3StepsXPath[2]/@class" | Should -Be "success"
-        Get-XmlValue "$scenario5Examples3StepsXPath[3]/@class" | Should -Be "success"
-        Get-XmlValue "$scenario5Examples3StepsXPath[4]/@class" | Should -Be "failure"
-        Get-XmlValue "$scenario5Examples3StepsXPath[5]/@class" | Should -Be "failure"
-        Get-XmlValue "$scenario5Examples3StepsXPath[6]/@class" | Should -Be "failure"
-        Get-XmlValue "$scenario5Examples3StepsXPath[7]/@class" | Should -Be "failure"
-        Get-XmlValue "$scenario5Examples3StepsXPath[8]/@class" | Should -Be "failure"
-        Get-XmlValue "$scenario5Examples3StepsXPath[9]/@class" | Should -Be "failure"
+        Get-XmlValue "$scenario5Examples3aStepsXPath[1]/@class" | Should -Be "failure"
+        Get-XmlValue "$scenario5Examples3aStepsXPath[2]/@class" | Should -Be "inconclusive"
+        Get-XmlValue "$scenario5Examples3aStepsXPath[3]/@class" | Should -Be "inconclusive"
+        Get-XmlValue "$scenario5Examples3bStepsXPath[1]/@class" | Should -Be "inconclusive"
+        Get-XmlValue "$scenario5Examples3bStepsXPath[2]/@class" | Should -Be "inconclusive"
+        Get-XmlValue "$scenario5Examples3bStepsXPath[3]/@class" | Should -Be "inconclusive"
+        Get-XmlValue "$scenario5Examples3cStepsXPath[1]/@class" | Should -Be "inconclusive"
+        Get-XmlValue "$scenario5Examples3cStepsXPath[2]/@class" | Should -Be "inconclusive"
+        Get-XmlValue "$scenario5Examples3cStepsXPath[3]/@class" | Should -Be "inconclusive"
 
-        Get-NextPreText "$scenario5Examples3StepsXPath[1]" | Should -Be "An example error in the given clause"
-        Get-NextPreText "$scenario5Examples3StepsXPath[4]" | Should -BeLike "*New-InconclusiveErrorRecord*"
-        Get-NextPreText "$scenario5Examples3StepsXPath[5]" | Should -BeLike "*New-InconclusiveErrorRecord*"
-        Get-NextPreText "$scenario5Examples3StepsXPath[6]" | Should -BeLike "*New-InconclusiveErrorRecord*"
-        Get-NextPreText "$scenario5Examples3StepsXPath[7]" | Should -BeLike "*New-InconclusiveErrorRecord*"
-        Get-NextPreText "$scenario5Examples3StepsXPath[8]" | Should -BeLike "*New-InconclusiveErrorRecord*"
-        Get-NextPreText "$scenario5Examples3StepsXPath[9]" | Should -BeLike "*New-InconclusiveErrorRecord*"
+        Get-NextPreText "$scenario5Examples3aStepsXPath[1]" | Should -Be "An example error in the given clause"
+        Get-NextPreText "$scenario5Examples3aStepsXPath[2]" | Should -Be "Step skipped (previous step did not pass)"
+        Get-NextPreText "$scenario5Examples3aStepsXPath[3]" | Should -Be "Step skipped (previous step did not pass)"
+        Get-NextPreText "$scenario5Examples3bStepsXPath[1]" | Should -Be "Could not find implementation for step!"
+        Get-NextPreText "$scenario5Examples3bStepsXPath[2]" | Should -Be "Could not find implementation for step!"
+        Get-NextPreText "$scenario5Examples3bStepsXPath[3]" | Should -Be "Could not find implementation for step!"
+        Get-NextPreText "$scenario5Examples3cStepsXPath[1]" | Should -Be "Could not find implementation for step!"
+        Get-NextPreText "$scenario5Examples3cStepsXPath[2]" | Should -Be "Could not find implementation for step!"
+        Get-NextPreText "$scenario5Examples3cStepsXPath[3]" | Should -Be "Could not find implementation for step!"
     }
 
 }
