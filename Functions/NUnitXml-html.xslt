@@ -63,12 +63,12 @@
     <!--<xsl:text>&lt;h2&gt;Test results&lt;/h2&gt;</xsl:text>-->
     <xsl:text>&lt;table&gt;</xsl:text>
 
-    <xsl:text>&lt;tr&gt;&lt;td&gt;&amp;nbsp;&lt;/td&gt;</xsl:text>
+    <xsl:text>&lt;tr&gt;&lt;td&gt;&amp;#160;&lt;/td&gt;</xsl:text>
     <xsl:text>&lt;th&gt;Total&lt;/th&gt;</xsl:text>
     <xsl:text>&lt;th class="success"&gt;Passed&lt;/th&gt;</xsl:text>
     <xsl:text>&lt;th class="inconclusive"&gt;Skipped&lt;/th&gt;</xsl:text>
     <xsl:text>&lt;th class="failure"&gt;Failed&lt;/th&gt;</xsl:text>
-    <xsl:text>&lt;/td&gt;&lt;/tr&gt;</xsl:text>
+    <xsl:text>&lt;/tr&gt;</xsl:text>
 
     <xsl:text>&lt;tr&gt;&lt;th&gt;</xsl:text>
     <xsl:value-of select="$mainGroupName" />
@@ -158,7 +158,7 @@
 
   <!-- Transformation of top-level test-suites which are the feature files -->
   <xsl:template match="/test-results/test-suite/results/test-suite">
-    <xsl:text>&lt;hr&gt;
+    <xsl:text>&lt;hr/&gt;
     &lt;h2&gt;</xsl:text>
 
     <!-- Feature file name -->
@@ -176,7 +176,7 @@
         </xsl:when>
         <xsl:when test="count(node()//test-case[@result='Failure']) &gt; 0">
           <!-- Only failures will be opened by default -->
-          <xsl:text> open class="failure</xsl:text>
+          <xsl:text> open="open" class="failure</xsl:text>
         </xsl:when>
         <xsl:otherwise>
         <xsl:text> class="inconclusive</xsl:text>
