@@ -108,6 +108,12 @@ function Invoke-Gherkin {
         .PARAMETER OutputFormat
             The format for output (LegacyNUnitXml or NUnitXml), defaults to NUnitXml
 
+        .PARAMETER TransformFile
+            The path where the written report file is tranformed to. If this path is not provided, no transformation will be executed.
+
+        .PARAMETER TransformFormat
+            The format for the transformed output, defaults to html
+
         .PARAMETER Quiet
             Disables the output Pester writes to screen. No other output is generated unless you specify PassThru,
             or one of the Output parameters.
@@ -212,6 +218,11 @@ function Invoke-Gherkin {
         [ValidateSet('NUnitXml')]
         [string] $OutputFormat = 'NUnitXml',
 
+        [string] $TransformFile,
+
+        [ValidateSet('html')]
+        [string] $TransformFormat = 'html',
+
         [Switch]$Quiet,
 
         [object]$PesterOption,
@@ -299,7 +310,7 @@ function Invoke-Gherkin {
         Exit-CoverageAnalysis -PesterState $pester
 
         if (& $SafeCommands["Get-Variable"]-Name OutputFile -ValueOnly -ErrorAction $script:IgnoreErrorPreference) {
-            Export-PesterResults -PesterState $pester -Path $OutputFile -Format $OutputFormat
+            Export-PesterResults -PesterState $pester -Path $OutputFile -Format $OutputFormat -TransformPath $TransformFile -TransformFormat $TransformFormat -TransformGherkin
         }
 
         if ($PassThru) {

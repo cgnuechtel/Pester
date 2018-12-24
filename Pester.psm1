@@ -785,6 +785,12 @@ If this path is not provided, no log will be generated.
 The format of output. Two formats of output are supported: NUnitXML and
 LegacyNUnitXML.
 
+.PARAMETER TransformFile
+The path where the written report file is tranformed to. If this path is not provided, no transformation will be executed.
+
+.PARAMETER TransformFormat
+The format for the transformed output, defaults to html
+
 .PARAMETER Tag
 Runs only tests in Describe blocks with the specified Tag parameter values.
 Wildcard characters are supported. Tag values that include spaces or whitespace
@@ -1067,6 +1073,11 @@ New-PesterOption
         [ValidateSet('NUnitXml')]
         [string] $OutputFormat = 'NUnitXml',
 
+        [string] $TransformFile,
+
+        [ValidateSet('html')]
+        [string] $TransformFormat = 'html',
+
         [Switch]$Quiet,
 
         [object]$PesterOption,
@@ -1220,7 +1231,7 @@ New-PesterOption
         Set-PesterStatistics
 
         if (& $script:SafeCommands['Get-Variable'] -Name OutputFile -ValueOnly -ErrorAction $script:IgnoreErrorPreference) {
-            Export-PesterResults -PesterState $pester -Path $OutputFile -Format $OutputFormat
+            Export-PesterResults -PesterState $pester -Path $OutputFile -Format $OutputFormat -TransformPath $TransformFile -TransformFormat $TransformFormat
         }
 
     if ($PassThru) {
@@ -1589,3 +1600,4 @@ Set-Alias -Name Add-ShouldOperator -Value Add-AssertionOperator
 & $script:SafeCommands['Export-ModuleMember'] SafeGetCommand, New-PesterOption
 & $script:SafeCommands['Export-ModuleMember'] Invoke-Gherkin, Find-GherkinStep, BeforeEachFeature, BeforeEachScenario, AfterEachFeature, AfterEachScenario, GherkinStep -Alias Given, When, Then, And, But
 & $script:SafeCommands['Export-ModuleMember'] New-MockObject, Add-AssertionOperator, Get-ShouldOperator  -Alias Add-ShouldOperator
+& $script:SafeCommands['Export-ModuleMember'] Convert-Report
