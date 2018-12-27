@@ -30,39 +30,67 @@ function Export-PesterResults
 {
     param (
         $PesterState,
-        [string] $Path,
-        [string] $Format,
-        [string] $TransformPath,
-        [string] $TransformFormat,
-        [switch] $TransformGherkin
+        [string[]] $Path,
+        [string[]] $Format,
+        [switch] $Gherkin
     )
 
-    switch ($Format)
+    $nUnitXmlFormat = "NUnitXml"
+    $htmlFormat = "html"
+    $htmlIndex = [array]::indexof($Format, $htmlFormat)
+    $nUnitXmlIndex = [array]::indexof($Format, $nUnitXmlFormat)
+    $nUnitXmlPath = $null
+    $htmlPath = $null
+    
+    if ($nUnitXmlIndex -ge 0) {
+        # NUnit XML path found
+        $nUnitXmlPath = $Path[$nUnitXmlIndex]
+    }
+    $deleteReport = $false
+    if ($htmlIndex -ge 0) {
+        # HTML path found
+        $htmlPath = $Path[$htmlIndex]
+        if (-not $nUnitXmlPath) {
+            # HTML path exist, but no NUnit XML path
+            # We use temporary NUnit XML path since it is required to create the HTML file
+            $nUnitXmlPath = $htmlPath + ".nunit.temp"
+            $deleteReport = $true
+        }
+    }
+
+    switch ($nUnitXmlFormat)
     {
-        'NUnitXml'       { Export-NUnitReport -PesterState $PesterState -Path $Path }
+        $nUnitXmlFormat  { Export-NUnitReport -PesterState $PesterState -Path $nUnitXmlPath }
 
         default
         {
             throw "'$Format' is not a valid Pester export format."
         }
     }
-    
-    if ($TransformPath) {
-        if ($TransformGherkin) {
-            # Slightly different content for Gherkin in the transformed text
-            $TransformParameters = @{
-                testRunTitle = "Pester Gherkin Run"
-                mainGroupName = "Features"
-                subGroupName = "Scenarios"
-                singleGroupName = "Steps"
-            }
-        } else {
-            # Default values
-            $TransformParameters = @{}
+
+    if ($htmlPath) {
+        # Default XSL transform parameters
+        $transformParameters = @{
+            powerShellVersion = $PSVersionTable.PSVersion.ToString()
         }
-        Convert-Report -InputFile $Path -OutputFile $TransformPath -InputFormat $Format -OutputFormat $TransformFormat -TransformParameters $TransformParameters
+        if ($Gherkin) {
+            # Slightly different content for Gherkin in the transformed text
+            $transformParameters.testRunTitle = "Pester Gherkin Run"
+            $transformParameters.mainGroupName = "Features"
+            $transformParameters.subGroupName = "Scenarios"
+            $transformParameters.singleGroupName = "Steps"
+        }
+
+        # Transform NUnit XML to HTML
+        Convert-Report -InputFile $nUnitXmlPath -OutputFile $htmlPath -InputFormat $nUnitXmlFormat -OutputFormat $htmlFormat -TransformParameters $transformParameters
+        if ($deleteReport) {
+            # We delete the temporary NUnit XML file, if we only want HTML output
+            Remove-Item $nUnitXmlPath
+            Write-Verbose "Temporary report $nUnitXmlPath deleted"
+        }
     }
 }
+
 function Export-NUnitReport {
     param (
         [parameter(Mandatory=$true,ValueFromPipeline=$true)]
@@ -575,10 +603,10 @@ function Convert-Report {
         $argList.AddParam($transformParameter.Key, "", $transformParameter.Value)
         Write-Debug "Parameter added: $($transformParameter.Key) => $($transformParameter.Value)"
     }
-    
+
     $outputStream = New-Object System.IO.MemoryStream
     $xslt = New-Object System.Xml.Xsl.XslCompiledTransform
-    $reader = new-object System.IO.StreamReader($outputStream)
+    $reader = New-object System.IO.StreamReader($outputStream)
     try {
         $xslt.Load([string] $xsltFile)
         Write-Debug "XSLT file loaded"
@@ -589,6 +617,8 @@ function Convert-Report {
         $transformed > $OutputFile
         Write-Debug "Output file written"
         Write-Verbose "XML report $InputFile ($InputFormat) converted successfully to $OutputFile ($OutputFormat)"
+    } catch {
+        Write-Error $_.Exception
     } finally {
         $reader.Close()
     }

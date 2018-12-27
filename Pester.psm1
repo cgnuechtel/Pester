@@ -781,9 +781,14 @@ the xml extension.
 
 If this path is not provided, no log will be generated.
 
+Since OutputFile is a string array, multiple output files may be specified.
+The order of the OutputFile parameter must match with the order of the OutputFormat parameter.
+
 .PARAMETER OutputFormat
-The format of output. Two formats of output are supported: NUnitXML and
-LegacyNUnitXML.
+The format of output. Two formats of output are supported: NUnitXML and html.
+
+Since OutputFormat is a string array, multiple output formats may be specified.
+The order of the OutputFormat parameter must match with the order of the OutputFile parameter.
 
 .PARAMETER TransformFile
 The path where the written report file is tranformed to. If this path is not provided, no transformation will be executed.
@@ -1067,11 +1072,11 @@ New-PesterOption
         [Switch]$Strict,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'NewOutputSet')]
-        [string] $OutputFile,
+        [string[]] $OutputFile,
 
         [Parameter(ParameterSetName = 'NewOutputSet')]
-        [ValidateSet('NUnitXml')]
-        [string] $OutputFormat = 'NUnitXml',
+        [ValidateSet('NUnitXml', 'html')]
+        [string[]] $OutputFormat = @('NUnitXml', 'html'),
 
         [string] $TransformFile,
 
