@@ -736,7 +736,7 @@ Describe "A created HTML report" -Tag Gherkin {
     }
 
     It 'should contain the expected number of scenarios' {
-        Get-XmlCount $xhtmlReport $scenariosXPath | Should -Be 8
+        Get-XmlCount $xhtmlReport $scenariosXPath | Should -Be 10
     }
 
     It 'should contain the expected number of steps' {
@@ -758,8 +758,8 @@ Describe "A created HTML report" -Tag Gherkin {
         $feature1Scenario4XPath = "$scenariosXPath[4]"
 
         Get-XmlInnerText $xhtmlReport "$feature1Scenario1XPath/summary/strong" | Should -Be "Scenario 1"
-        Get-XmlInnerText $xhtmlReport "$feature1Scenario2XPath/summary/strong" | Should -Match "(?s)Scenario 2.+Examples 1"
-        Get-XmlInnerText $xhtmlReport "$feature1Scenario3XPath/summary/strong" | Should -Match "(?s)Scenario 2.+Examples 2"
+        Get-XmlInnerText $xhtmlReport "$feature1Scenario2XPath/summary/strong" | Should -Be "Scenario 2 [Examples 1 1]"
+        Get-XmlInnerText $xhtmlReport "$feature1Scenario3XPath/summary/strong" | Should -Be "Scenario 2 [Examples 2 1]"
         Get-XmlInnerText $xhtmlReport "$feature1Scenario4XPath/summary/strong" | Should -Be "Scenario 3"
 
         Get-XmlValue $xhtmlReport "$feature1Scenario1XPath/@class" | Should -BeExactly "success"
@@ -773,16 +773,22 @@ Describe "A created HTML report" -Tag Gherkin {
         $feature2Scenario2XPath = "$scenariosXPath[6]"
         $feature2Scenario3XPath = "$scenariosXPath[7]"
         $feature2Scenario4XPath = "$scenariosXPath[8]"
+        $feature2Scenario5XPath = "$scenariosXPath[9]"
+        $feature2Scenario6XPath = "$scenariosXPath[10]"
 
         Get-XmlInnerText $xhtmlReport "$feature2Scenario1XPath/summary/strong" | Should -Be "Scenario 4"
-        Get-XmlInnerText $xhtmlReport "$feature2Scenario2XPath/summary/strong" | Should -Match "(?s)Scenario 5.+Examples 1"
-        Get-XmlInnerText $xhtmlReport "$feature2Scenario3XPath/summary/strong" | Should -Match "(?s)Scenario 5.+Examples 2"
-        Get-XmlInnerText $xhtmlReport "$feature2Scenario4XPath/summary/strong" | Should -Match "(?s)Scenario 5.+Examples 3"
+        Get-XmlInnerText $xhtmlReport "$feature2Scenario2XPath/summary/strong" | Should -Be "Scenario 5 [Examples 1 1]"
+        Get-XmlInnerText $xhtmlReport "$feature2Scenario3XPath/summary/strong" | Should -Be "Scenario 5 [Examples 2 1]"
+        Get-XmlInnerText $xhtmlReport "$feature2Scenario4XPath/summary/strong" | Should -Be "Scenario 5 [Examples 3 1]"
+        Get-XmlInnerText $xhtmlReport "$feature2Scenario5XPath/summary/strong" | Should -Be "Scenario 5 [Examples 3 2]"
+        Get-XmlInnerText $xhtmlReport "$feature2Scenario6XPath/summary/strong" | Should -Be "Scenario 5 [Examples 3 3]"
 
         Get-XmlValue $xhtmlReport "$feature2Scenario1XPath/@class" | Should -Be "failure"
-        Get-XmlValue $xhtmlReport "$feature2Scenario2XPath/@class" | Should -Be "failure"
-        Get-XmlValue $xhtmlReport "$feature2Scenario3XPath/@class" | Should -Be "failure"
+        Get-XmlValue $xhtmlReport "$feature2Scenario2XPath/@class" | Should -Be "inconclusive"
+        Get-XmlValue $xhtmlReport "$feature2Scenario3XPath/@class" | Should -Be "inconclusive"
         Get-XmlValue $xhtmlReport "$feature2Scenario4XPath/@class" | Should -Be "failure"
+        Get-XmlValue $xhtmlReport "$feature2Scenario5XPath/@class" | Should -Be "inconclusive"
+        Get-XmlValue $xhtmlReport "$feature2Scenario6XPath/@class" | Should -Be "inconclusive"
     }
 
     It 'should contain all steps of scenario 1 with correct names and test results' {
@@ -816,9 +822,10 @@ Describe "A created HTML report" -Tag Gherkin {
         Get-XmlValue $xhtmlReport "$scenario2Examples1StepsXPath[3]/@class" | Should -BeExactly "success"
         Get-XmlValue $xhtmlReport "$scenario2Examples1StepsXPath[4]/@class" | Should -BeExactly "success"
         Get-XmlValue $xhtmlReport "$scenario2Examples1StepsXPath[5]/@class" | Should -BeExactly "failure"
-        Get-XmlValue $xhtmlReport "$scenario2Examples1StepsXPath[6]/@class" | Should -BeExactly "success"
+        Get-XmlValue $xhtmlReport "$scenario2Examples1StepsXPath[6]/@class" | Should -BeExactly "inconclusive"
 
         Get-NextPreText $xhtmlReport "$scenario2Examples1StepsXPath[5]" | Should -Be "An example error in the then clause"
+        Get-NextPreText $xhtmlReport "$scenario2Examples1StepsXPath[6]" | Should -Be "Step skipped (previous step did not pass)"
     }
 
     It 'should contain all steps of scenario 2 (examples 2) with correct names and test results' {
@@ -848,8 +855,8 @@ Describe "A created HTML report" -Tag Gherkin {
 
         Get-XmlInnerText $xhtmlReport "$scenario3StepsXPath[1]" | Should -Be "Given step_301"
         Get-XmlInnerText $xhtmlReport "$scenario3StepsXPath[2]" | Should -Be "When step_302"
-        Get-XmlInnerText $xhtmlReport "$scenario3StepsXPath[4]" | Should -Be "Then step_303"
-        Get-XmlInnerText $xhtmlReport "$scenario3StepsXPath[3]" | Should -Be "When step_302"
+        Get-XmlInnerText $xhtmlReport "$scenario3StepsXPath[3]" | Should -Be "Then step_303"
+        Get-XmlInnerText $xhtmlReport "$scenario3StepsXPath[4]" | Should -Be "When step_302"
         Get-XmlInnerText $xhtmlReport "$scenario3StepsXPath[5]" | Should -Be "Then step_304"
 
         Get-XmlValue $xhtmlReport "$scenario3StepsXPath[1]/@class" | Should -BeExactly "success"
@@ -872,9 +879,10 @@ Describe "A created HTML report" -Tag Gherkin {
 
         Get-XmlValue $xhtmlReport "$scenario4StepsXPath[1]/@class" | Should -BeExactly "success"
         Get-XmlValue $xhtmlReport "$scenario4StepsXPath[2]/@class" | Should -BeExactly "failure"
-        Get-XmlValue $xhtmlReport "$scenario4StepsXPath[3]/@class" | Should -BeExactly "success"
+        Get-XmlValue $xhtmlReport "$scenario4StepsXPath[3]/@class" | Should -BeExactly "inconclusive"
 
         Get-NextPreText $xhtmlReport "$scenario4StepsXPath[2]" | Should -Be "An example error in the when clause"
+        Get-NextPreText $xhtmlReport "$scenario4StepsXPath[3]" | Should -Be "Step skipped (previous step did not pass)"
     }
 
     It 'should contain all steps of scenario 5 (examples 1) with correct names and test results' {
@@ -886,13 +894,13 @@ Describe "A created HTML report" -Tag Gherkin {
         Get-XmlInnerText $xhtmlReport "$scenario5Examples1StepsXPath[2]" | Should -Be "When step_502"
         Get-XmlInnerText $xhtmlReport "$scenario5Examples1StepsXPath[3]" | Should -Be "Then step_503"
 
-        Get-XmlValue $xhtmlReport "$scenario5Examples1StepsXPath[1]/@class" | Should -BeExactly "failure"
-        Get-XmlValue $xhtmlReport "$scenario5Examples1StepsXPath[2]/@class" | Should -BeExactly "failure"
-        Get-XmlValue $xhtmlReport "$scenario5Examples1StepsXPath[3]/@class" | Should -BeExactly "failure"
+        Get-XmlValue $xhtmlReport "$scenario5Examples1StepsXPath[1]/@class" | Should -BeExactly "inconclusive"
+        Get-XmlValue $xhtmlReport "$scenario5Examples1StepsXPath[2]/@class" | Should -BeExactly "inconclusive"
+        Get-XmlValue $xhtmlReport "$scenario5Examples1StepsXPath[3]/@class" | Should -BeExactly "inconclusive"
 
-        Get-NextPreText $xhtmlReport "$scenario5Examples1StepsXPath[1]" | Should -BeLike "*New-InconclusiveErrorRecord*"
-        Get-NextPreText $xhtmlReport "$scenario5Examples1StepsXPath[2]" | Should -BeLike "*New-InconclusiveErrorRecord*"
-        Get-NextPreText $xhtmlReport "$scenario5Examples1StepsXPath[3]" | Should -BeLike "*New-InconclusiveErrorRecord*"
+        Get-NextPreText $xhtmlReport "$scenario5Examples1StepsXPath[1]" | Should -Be "Could not find implementation for step!"
+        Get-NextPreText $xhtmlReport "$scenario5Examples1StepsXPath[2]" | Should -Be "Could not find implementation for step!"
+        Get-NextPreText $xhtmlReport "$scenario5Examples1StepsXPath[3]" | Should -Be "Could not find implementation for step!"
     }
 
     It 'should contain all steps of scenario 5 (examples 2) with correct names and test results' {
@@ -904,47 +912,53 @@ Describe "A created HTML report" -Tag Gherkin {
         Get-XmlInnerText $xhtmlReport "$scenario5Examples2StepsXPath[2]" | Should -Be "When step_602"
         Get-XmlInnerText $xhtmlReport "$scenario5Examples2StepsXPath[3]" | Should -Be "Then step_603"
 
-        Get-XmlValue $xhtmlReport "$scenario5Examples2StepsXPath[1]/@class" | Should -BeExactly "failure"
-        Get-XmlValue $xhtmlReport "$scenario5Examples2StepsXPath[2]/@class" | Should -BeExactly "failure"
-        Get-XmlValue $xhtmlReport "$scenario5Examples2StepsXPath[3]/@class" | Should -BeExactly "failure"
+        Get-XmlValue $xhtmlReport "$scenario5Examples2StepsXPath[1]/@class" | Should -BeExactly "inconclusive"
+        Get-XmlValue $xhtmlReport "$scenario5Examples2StepsXPath[2]/@class" | Should -BeExactly "inconclusive"
+        Get-XmlValue $xhtmlReport "$scenario5Examples2StepsXPath[3]/@class" | Should -BeExactly "inconclusive"
 
-        Get-NextPreText $xhtmlReport "$scenario5Examples2StepsXPath[1]" | Should -BeLike "*New-InconclusiveErrorRecord*"
-        Get-NextPreText $xhtmlReport "$scenario5Examples2StepsXPath[2]" | Should -BeLike "*New-InconclusiveErrorRecord*"
-        Get-NextPreText $xhtmlReport "$scenario5Examples2StepsXPath[3]" | Should -BeLike "*New-InconclusiveErrorRecord*"
+        Get-NextPreText $xhtmlReport "$scenario5Examples2StepsXPath[1]" | Should -Be "Could not find implementation for step!"
+        Get-NextPreText $xhtmlReport "$scenario5Examples2StepsXPath[2]" | Should -Be "Could not find implementation for step!"
+        Get-NextPreText $xhtmlReport "$scenario5Examples2StepsXPath[3]" | Should -Be "Could not find implementation for step!"
     }
 
     It 'should contain all steps of scenario 5 (examples 3) with correct names and test results' {
-        $scenario5Examples3StepsXPath = "$scenariosXPath[8]/div"
+        $scenario5Examples3aStepsXPath = "$scenariosXPath[8]/div"
+        $scenario5Examples3bStepsXPath = "$scenariosXPath[9]/div"
+        $scenario5Examples3cStepsXPath = "$scenariosXPath[10]/div"
 
-        Get-XmlCount $xhtmlReport $scenario5Examples3StepsXPath | Should -Be 9
+        Get-XmlCount $xhtmlReport $scenario5Examples3aStepsXPath | Should -Be 3
+        Get-XmlCount $xhtmlReport $scenario5Examples3bStepsXPath | Should -Be 3
+        Get-XmlCount $xhtmlReport $scenario5Examples3cStepsXPath | Should -Be 3
 
-        Get-XmlInnerText $xhtmlReport "$scenario5Examples3StepsXPath[1]" | Should -Be "Given step_701"
-        Get-XmlInnerText $xhtmlReport "$scenario5Examples3StepsXPath[2]" | Should -Be "When step_702"
-        Get-XmlInnerText $xhtmlReport "$scenario5Examples3StepsXPath[3]" | Should -Be "Then step_703"
-        Get-XmlInnerText $xhtmlReport "$scenario5Examples3StepsXPath[4]" | Should -Be "Given step_801"
-        Get-XmlInnerText $xhtmlReport "$scenario5Examples3StepsXPath[5]" | Should -Be "When step_802"
-        Get-XmlInnerText $xhtmlReport "$scenario5Examples3StepsXPath[6]" | Should -Be "Then step_803"
-        Get-XmlInnerText $xhtmlReport "$scenario5Examples3StepsXPath[7]" | Should -Be "Given step_901"
-        Get-XmlInnerText $xhtmlReport "$scenario5Examples3StepsXPath[8]" | Should -Be "When step_902"
-        Get-XmlInnerText $xhtmlReport "$scenario5Examples3StepsXPath[9]" | Should -Be "Then step_903"
+        Get-XmlInnerText $xhtmlReport "$scenario5Examples3aStepsXPath[1]" | Should -Be "Given step_701"
+        Get-XmlInnerText $xhtmlReport "$scenario5Examples3aStepsXPath[2]" | Should -Be "When step_702"
+        Get-XmlInnerText $xhtmlReport "$scenario5Examples3aStepsXPath[3]" | Should -Be "Then step_703"
+        Get-XmlInnerText $xhtmlReport "$scenario5Examples3bStepsXPath[1]" | Should -Be "Given step_801"
+        Get-XmlInnerText $xhtmlReport "$scenario5Examples3bStepsXPath[2]" | Should -Be "When step_802"
+        Get-XmlInnerText $xhtmlReport "$scenario5Examples3bStepsXPath[3]" | Should -Be "Then step_803"
+        Get-XmlInnerText $xhtmlReport "$scenario5Examples3cStepsXPath[1]" | Should -Be "Given step_901"
+        Get-XmlInnerText $xhtmlReport "$scenario5Examples3cStepsXPath[2]" | Should -Be "When step_902"
+        Get-XmlInnerText $xhtmlReport "$scenario5Examples3cStepsXPath[3]" | Should -Be "Then step_903"
 
-        Get-XmlValue $xhtmlReport "$scenario5Examples3StepsXPath[1]/@class" | Should -Be "failure"
-        Get-XmlValue $xhtmlReport "$scenario5Examples3StepsXPath[2]/@class" | Should -Be "success"
-        Get-XmlValue $xhtmlReport "$scenario5Examples3StepsXPath[3]/@class" | Should -Be "success"
-        Get-XmlValue $xhtmlReport "$scenario5Examples3StepsXPath[4]/@class" | Should -Be "failure"
-        Get-XmlValue $xhtmlReport "$scenario5Examples3StepsXPath[5]/@class" | Should -Be "failure"
-        Get-XmlValue $xhtmlReport "$scenario5Examples3StepsXPath[6]/@class" | Should -Be "failure"
-        Get-XmlValue $xhtmlReport "$scenario5Examples3StepsXPath[7]/@class" | Should -Be "failure"
-        Get-XmlValue $xhtmlReport "$scenario5Examples3StepsXPath[8]/@class" | Should -Be "failure"
-        Get-XmlValue $xhtmlReport "$scenario5Examples3StepsXPath[9]/@class" | Should -Be "failure"
+        Get-XmlValue $xhtmlReport "$scenario5Examples3aStepsXPath[1]/@class" | Should -Be "failure"
+        Get-XmlValue $xhtmlReport "$scenario5Examples3aStepsXPath[2]/@class" | Should -Be "inconclusive"
+        Get-XmlValue $xhtmlReport "$scenario5Examples3aStepsXPath[3]/@class" | Should -Be "inconclusive"
+        Get-XmlValue $xhtmlReport "$scenario5Examples3bStepsXPath[1]/@class" | Should -Be "inconclusive"
+        Get-XmlValue $xhtmlReport "$scenario5Examples3bStepsXPath[2]/@class" | Should -Be "inconclusive"
+        Get-XmlValue $xhtmlReport "$scenario5Examples3bStepsXPath[3]/@class" | Should -Be "inconclusive"
+        Get-XmlValue $xhtmlReport "$scenario5Examples3cStepsXPath[1]/@class" | Should -Be "inconclusive"
+        Get-XmlValue $xhtmlReport "$scenario5Examples3cStepsXPath[2]/@class" | Should -Be "inconclusive"
+        Get-XmlValue $xhtmlReport "$scenario5Examples3cStepsXPath[3]/@class" | Should -Be "inconclusive"
 
-        Get-NextPreText $xhtmlReport "$scenario5Examples3StepsXPath[1]" | Should -Be "An example error in the given clause"
-        Get-NextPreText $xhtmlReport "$scenario5Examples3StepsXPath[4]" | Should -BeLike "*New-InconclusiveErrorRecord*"
-        Get-NextPreText $xhtmlReport "$scenario5Examples3StepsXPath[5]" | Should -BeLike "*New-InconclusiveErrorRecord*"
-        Get-NextPreText $xhtmlReport "$scenario5Examples3StepsXPath[6]" | Should -BeLike "*New-InconclusiveErrorRecord*"
-        Get-NextPreText $xhtmlReport "$scenario5Examples3StepsXPath[7]" | Should -BeLike "*New-InconclusiveErrorRecord*"
-        Get-NextPreText $xhtmlReport "$scenario5Examples3StepsXPath[8]" | Should -BeLike "*New-InconclusiveErrorRecord*"
-        Get-NextPreText $xhtmlReport "$scenario5Examples3StepsXPath[9]" | Should -BeLike "*New-InconclusiveErrorRecord*"
+        Get-NextPreText $xhtmlReport "$scenario5Examples3aStepsXPath[1]" | Should -Be "An example error in the given clause"
+        Get-NextPreText $xhtmlReport "$scenario5Examples3aStepsXPath[2]" | Should -Be "Step skipped (previous step did not pass)"
+        Get-NextPreText $xhtmlReport "$scenario5Examples3aStepsXPath[3]" | Should -Be "Step skipped (previous step did not pass)"
+        Get-NextPreText $xhtmlReport "$scenario5Examples3bStepsXPath[1]" | Should -Be "Could not find implementation for step!"
+        Get-NextPreText $xhtmlReport "$scenario5Examples3bStepsXPath[2]" | Should -Be "Could not find implementation for step!"
+        Get-NextPreText $xhtmlReport "$scenario5Examples3bStepsXPath[3]" | Should -Be "Could not find implementation for step!"
+        Get-NextPreText $xhtmlReport "$scenario5Examples3cStepsXPath[1]" | Should -Be "Could not find implementation for step!"
+        Get-NextPreText $xhtmlReport "$scenario5Examples3cStepsXPath[2]" | Should -Be "Could not find implementation for step!"
+        Get-NextPreText $xhtmlReport "$scenario5Examples3cStepsXPath[3]" | Should -Be "Could not find implementation for step!"
     }
 
     It 'should contain a headline for the test results' {
@@ -960,13 +974,13 @@ Describe "A created HTML report" -Tag Gherkin {
     
         Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[1]/th[1]" | Should -BeExactly "Total"
         Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[2]/td[1]" | Should -BeExactly "2"
-        Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[3]/td[1]" | Should -BeExactly "8"
+        Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[3]/td[1]" | Should -BeExactly "10"
         Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[4]/td[1]" | Should -BeExactly "38"
         
         Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[1]/th[2]" | Should -BeExactly "Passed"
         Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[2]/td[2]" | Should -BeExactly "0"
         Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[3]/td[2]" | Should -BeExactly "2"
-        Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[4]/td[2]" | Should -BeExactly "22"
+        Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[4]/td[2]" | Should -BeExactly "18"
         Get-XmlValue $xhtmlReport "$resultsTableXPath/tr[1]/th[2]/@class" | Should -BeLike "*success*"
         Get-XmlValue $xhtmlReport "$resultsTableXPath/tr[2]/td[2]/@class" | Should -BeLike "*success*"
         Get-XmlValue $xhtmlReport "$resultsTableXPath/tr[3]/td[2]/@class" | Should -BeLike "*success*"
@@ -974,8 +988,8 @@ Describe "A created HTML report" -Tag Gherkin {
         
         Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[1]/th[3]" | Should -BeExactly "Skipped"
         Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[2]/td[3]" | Should -BeExactly "0"
-        Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[3]/td[3]" | Should -BeExactly "0"
-        Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[4]/td[3]" | Should -BeExactly "0"
+        Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[3]/td[3]" | Should -BeExactly "4"
+        Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[4]/td[3]" | Should -BeExactly "16"
         Get-XmlValue $xhtmlReport "$resultsTableXPath/tr[1]/th[3]/@class" | Should -BeLike "*inconclusive*"
         Get-XmlValue $xhtmlReport "$resultsTableXPath/tr[2]/td[3]/@class" | Should -BeLike "*inconclusive*"
         Get-XmlValue $xhtmlReport "$resultsTableXPath/tr[3]/td[3]/@class" | Should -BeLike "*inconclusive*"
@@ -983,8 +997,8 @@ Describe "A created HTML report" -Tag Gherkin {
         
         Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[1]/th[4]" | Should -BeExactly "Failed"
         Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[2]/td[4]" | Should -BeExactly "2"
-        Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[3]/td[4]" | Should -BeExactly "6"
-        Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[4]/td[4]" | Should -BeExactly "16"
+        Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[3]/td[4]" | Should -BeExactly "4"
+        Get-XmlInnerText $xhtmlReport "$resultsTableXPath/tr[4]/td[4]" | Should -BeExactly "4"
         Get-XmlValue $xhtmlReport "$resultsTableXPath/tr[1]/th[4]/@class" | Should -BeLike "*failure*"
         Get-XmlValue $xhtmlReport "$resultsTableXPath/tr[2]/td[4]/@class" | Should -BeLike "*failure*"
         Get-XmlValue $xhtmlReport "$resultsTableXPath/tr[3]/td[4]/@class" | Should -BeLike "*failure*"
