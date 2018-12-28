@@ -475,7 +475,6 @@ function Invoke-GherkinFeature {
         [PSObject]$Pester,
         [string]$StepPath
     )
-    $Pester.EnterTestGroup($FeatureFile.FullName, 'Script')
     # Make sure broken tests don't leave you in space:
     $CWD = [Environment]::CurrentDirectory
     $Location = & $SafeCommands["Get-Location"]
@@ -490,6 +489,9 @@ function Invoke-GherkinFeature {
         & $SafeCommands["Write-Error"] -Exception $_.Exception -Message "Skipped '$($FeatureFile.FullName)' because of parser error.`n$(($_.Exception.Errors | & $SafeCommands["Select-Object"] -Expand Message) -join "`n`n")"
         continue
     }
+
+    # To create a more user-friendly test report, we use the feature name for the test group
+    $Pester.EnterTestGroup($Feature.Name, 'Script')
 
     $null = $Pester.Features.Add($Feature)
     Invoke-GherkinHook BeforeEachFeature $Feature.Name $Feature.Tags
@@ -537,7 +539,7 @@ function Invoke-GherkinFeature {
 
     Invoke-GherkinHook AfterEachFeature $Feature.Name $Feature.Tags
 
-    $Pester.LeaveTestGroup($FeatureFile.FullName, 'Script')
+    $Pester.LeaveTestGroup($Feature.Name, 'Script')
 
 }
 

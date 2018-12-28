@@ -468,11 +468,11 @@ Describe "A generated NUnit report" -Tag Gherkin {
     }
 
     It 'should contain feature 1' {
-        Get-XmlValue "$featuresXPath[1]/@name" | Should -Be $expectedFeatureFileName1
+        Get-XmlValue "$featuresXPath[1]/@name" | Should -Be 'A test feature for reporting 1'
     }
 
     It 'should contain feature 2' {
-        Get-XmlValue "$featuresXPath[2]/@name" | Should -Be $expectedFeatureFileName2
+        Get-XmlValue "$featuresXPath[2]/@name" | Should -Be 'A test feature for reporting 2'
     }
 
     It 'should contain all scenarios of feature 1 with correct names and test results' {
@@ -715,9 +715,6 @@ Describe "A created HTML report" -Tag Gherkin {
         # Will be evaluated below
     }
 
-    $expectedFeatureFileName1 = (Join-Path $scriptRoot Examples\Gherkin\JustForReporting1.feature)
-    $expectedFeatureFileName2 = (Join-Path $scriptRoot Examples\Gherkin\JustForReporting2.feature)
-
     $featuresXPath = "/html/body/h2"
 
     $scenariosXPath = "/html/body/details"
@@ -744,11 +741,11 @@ Describe "A created HTML report" -Tag Gherkin {
     }
 
     It 'should contain feature 1' {
-        Get-XmlInnerText $xhtmlReport "$featuresXPath[1]" | Should -Be $expectedFeatureFileName1
+        Get-XmlInnerText $xhtmlReport "$featuresXPath[1]" | Should -Be 'A test feature for reporting 1'
     }
 
     It 'should contain feature 2' {
-        Get-XmlInnerText $xhtmlReport "$featuresXPath[2]" | Should -Be $expectedFeatureFileName2
+        Get-XmlInnerText $xhtmlReport "$featuresXPath[2]" | Should -Be 'A test feature for reporting 2'
     }
 
     It 'should contain all scenarios of feature 1 with correct names and test results' {
