@@ -63,7 +63,7 @@
         <h1><xsl:value-of select="$testRunTitle" /></h1>
         <table>
           <tr>
-            <td class="widthHeader2">&#160;</td>
+            <td class="widthHeader2"><xsl:text disable-output-escaping="yes">&amp;#160;</xsl:text></td>
             <th class="widthHeader">Total</th>
             <th class="success widthHeader">Passed</th>
             <th class="inconclusive widthHeader">Skipped</th>
