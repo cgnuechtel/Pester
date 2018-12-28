@@ -70,8 +70,13 @@ function Export-PesterResults
 
     if ($htmlPath) {
         # Default XSL transform parameters
+        if ($PSVersionTable.Keys -contains "PSEdition") {
+            $extraVersionString = " ($($PSVersionTable.PSEdition))"
+        } else {
+            $extraVersionString = ""
+        }
         $transformParameters = @{
-            powerShellVersion = $PSVersionTable.PSVersion.ToString()
+            powerShellVersion = "$($PSVersionTable.PSVersion)$extraVersionString"
         }
         if ($Gherkin) {
             # Slightly different content for Gherkin in the transformed text
@@ -590,7 +595,7 @@ function Convert-Report {
     Write-Debug "Output file name:     $OutputFile"
     Write-Debug "Input format:         $InputFormat"
     Write-Debug "Output format:        $OutputFormat"
-    $xsltFile = "${Script:PesterRoot}\Functions\$InputFormat-$OutputFormat.xslt"
+    $xsltFile = "${Script:PesterRoot}{0}Functions{0}$InputFormat-$OutputFormat.xslt" -f [System.IO.Path]::DirectorySeparatorChar
     $fullInputFile = Resolve-Path $InputFile
     if ($InputFile -ne $fullInputFile) {
         Write-Debug "Full input file name: $fullInputFile"
